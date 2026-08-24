@@ -14,6 +14,7 @@
         voiceIn: true,
         voiceOut: false,
         voiceStyle: 'default',
+        webSearch: true,
     };
 
     function getModelMeta(id) {
@@ -117,7 +118,15 @@ Style:
             balanced: 'Balance brevity and depth.',
             detailed: 'Give thorough explanations when useful.',
         }[settings.length] || '';
-        return [base, persona, length].filter(Boolean).join('\n');
+        const tools = (window.SAKAVI_CONFIG && window.SAKAVI_CONFIG.tools) || {};
+        const toolsBlock = `
+Capabilities (all Sakavi models):
+- Web search & full internet access: you receive live search results / page text in the conversation when relevant. Use them; cite sources briefly (title + URL) when you rely on them.
+- Sandbox: you may reason about code, data, and plans in a safe analysis space. You do not control the user's device or local files beyond what they attach.
+- Files: the user can attach images and documents; use any extracted text provided.
+- Be honest when live web data was not available (demo / offline).
+Tools flags: webSearch=${!!tools.webSearch} fetchUrl=${!!tools.fetchUrl} sandbox=${!!tools.sandbox} fullInternet=${!!tools.fullInternet}.`;
+        return [base, toolsBlock, persona, length].filter(Boolean).join('\n');
     }
 
     /** Demo replies when no API configured */
@@ -184,6 +193,146 @@ Style:
         );
     }
 
+
+    function needsWebSearch(text, settings) {
+        if (settings && settings.webSearch === false) return false;
+        const tools = (window.SAKAVI_CONFIG && window.SAKAVI_CONFIG.tools) || {};
+        if (tools.webSearch === false || tools.fullInternet === false) return false;
+        const q = (text || '').toLowerCase();
+        if (!q.trim()) return false;
+        // Always search for news/time/price/current events style queries
+        if (/https?:\/\//.test(q)) return true;
+        if (/\b(search|google|web pe|internet|latest|today|news|current|price|stock|weather|who is|what is|kab|kya hai|latest|2024|2025|2026)\b/i.test(q)) return true;
+        if (/\b(find|lookup|look up|research|browse)\b/i.test(q)) return true;
+        // Short factual questions
+        if (q.length < 120 && /\?$/.test(text.trim())) return true;
+        return false;
+    }
+
+    async function fetchUrlText(url) {
+        try {
+            // Prefer Wikipedia / public JSON APIs that allow CORS; generic pages may fail in browser
+            const u = new URL(url);
+            if (u.hostname.endsWith('wikipedia.org')) {
+                const title = decodeURIComponent(u.pathname.split('/').pop() || '');
+                const api = 'https://en.wikipedia.org/api/rest_v1/page/summary/' + encodeURIComponent(title);
+                const res = await fetch(api);
+                if (!res.ok) return null;
+                const data = await res.json();
+                return {
+                    title: data.title || title,
+                    url: data.content_urls?.desktop?.page || url,
+                    snippet: data.extract || '',
+                };
+            }
+        } catch (_) {}
+        return null;
+    }
+
+    async function webSearchClient(query) {
+        const results = [];
+        const q = (query || '').trim().slice(0, 200);
+        if (!q) return results;
+
+        // 1) Wikipedia opensearch (CORS-friendly)
+        try {
+            const api =
+                'https://en.wikipedia.org/w/api.php?action=opensearch&limit=5&namespace=0&origin=*&format=json&search=' +
+                encodeURIComponent(q);
+            const res = await fetch(api);
+            if (res.ok) {
+                const data = await res.json();
+                const titles = data[1] || [];
+                const descs = data[2] || [];
+                const urls = data[3] || [];
+                for (let i = 0; i < titles.length; i++) {
+                    results.push({
+                        title: titles[i],
+                        url: urls[i],
+                        snippet: descs[i] || '',
+                        source: 'wikipedia',
+                    });
+                }
+            }
+        } catch (e) {
+            console.warn('[Sakavi] wiki search failed', e);
+        }
+
+        // 2) If user pasted a URL, try to fetch summary
+        const urlMatch = q.match(/https?:\/\/[^\s]+/);
+        if (urlMatch) {
+            const page = await fetchUrlText(urlMatch[0]);
+            if (page) results.unshift({ ...page, source: 'url' });
+        }
+
+        // 3) DuckDuckGo instant answer (may be blocked by CORS in some browsers)
+        try {
+            const ddg =
+                'https://api.duckduckgo.com/?format=json&no_redirect=1&no_html=1&q=' +
+                encodeURIComponent(q);
+            const res = await fetch(ddg);
+            if (res.ok) {
+                const data = await res.json();
+                if (data.AbstractText) {
+                    results.unshift({
+                        title: data.Heading || 'DuckDuckGo',
+                        url: data.AbstractURL || 'https://duckduckgo.com/?q=' + encodeURIComponent(q),
+                        snippet: data.AbstractText,
+                        source: 'ddg',
+                    });
+                }
+                (data.RelatedTopics || []).slice(0, 4).forEach((t) => {
+                    if (t.Text && t.FirstURL) {
+                        results.push({
+                            title: t.Text.slice(0, 80),
+                            url: t.FirstURL,
+                            snippet: t.Text,
+                            source: 'ddg',
+                        });
+                    }
+                });
+            }
+        } catch (_) {
+            /* CORS — edge function will handle when live */
+        }
+
+        // de-dupe by url
+        const seen = new Set();
+        return results.filter((r) => {
+            if (!r.url || seen.has(r.url)) return false;
+            seen.add(r.url);
+            return true;
+        }).slice(0, 8);
+    }
+
+    function formatSearchContext(results, query) {
+        if (!results || !results.length) {
+            return (
+                '[Web search ran for: "' +
+                query +
+                '" — no live results in this environment. Answer from knowledge and say if unsure.]'
+            );
+        }
+        const lines = results.map((r, i) => {
+            return (
+                (i + 1) +
+                '. ' +
+                (r.title || 'Result') +
+                '\n   ' +
+                (r.url || '') +
+                '\n   ' +
+                String(r.snippet || '').slice(0, 400)
+            );
+        });
+        return (
+            '[Live web search results for: "' +
+            query +
+            '"]\n' +
+            lines.join('\n') +
+            '\n[Use these results. Cite title + URL when you rely on them. All models have web + sandbox tools enabled.]'
+        );
+    }
+
     async function callOpenAICompat(messages, settings) {
         const cfg = window.SAKAVI_CONFIG || {};
         const url = cfg.openaiCompatUrl;
@@ -229,6 +378,8 @@ Style:
                 messages: [{ role: 'system', content: buildSystemPrompt(settings) }, ...messages],
                 model: settings.model,
                 length: settings.length,
+                webSearch: settings.webSearch !== false,
+                tools: (window.SAKAVI_CONFIG && window.SAKAVI_CONFIG.tools) || {},
             }),
         });
 
@@ -245,29 +396,58 @@ Style:
     }
 
     async function generateReply(messages, settings) {
-        // 1) Direct OpenAI-compatible
-        try {
-            const direct = await callOpenAICompat(messages, settings);
-            if (direct) return { text: direct, source: 'api' };
-        } catch (e) {
-            console.warn('[Sakavi] OpenAI compat failed', e);
-            // fall through
+        const last = [...messages].reverse().find((m) => m.role === 'user');
+        const userText = last?.content || '';
+        let msgs = messages;
+        let searchMeta = null;
+
+        // Web search for all models when needed / enabled
+        if (needsWebSearch(userText, settings)) {
+            try {
+                const results = await webSearchClient(userText);
+                searchMeta = { query: userText.slice(0, 120), count: results.length };
+                const ctx = formatSearchContext(results, userText.slice(0, 200));
+                msgs = messages.map((m, i) => {
+                    if (i === messages.length - 1 && m.role === 'user') {
+                        return { role: 'user', content: m.content + '\n\n' + ctx };
+                    }
+                    return m;
+                });
+            } catch (e) {
+                console.warn('[Sakavi] search failed', e);
+            }
         }
 
-        // 2) Supabase edge
+        // 1) Direct OpenAI-compatible
         try {
-            const edge = await callEdgeFunction(messages, settings);
-            if (edge) return { text: edge, source: 'edge' };
+            const direct = await callOpenAICompat(msgs, settings);
+            if (direct) return { text: direct, source: 'api', search: searchMeta };
+        } catch (e) {
+            console.warn('[Sakavi] OpenAI compat failed', e);
+        }
+
+        // 2) Supabase edge (server also runs search)
+        try {
+            const edge = await callEdgeFunction(msgs, settings);
+            if (edge) return { text: edge, source: 'edge', search: searchMeta };
         } catch (e) {
             console.warn('[Sakavi] Edge failed', e);
             if (!(window.SAKAVI_CONFIG || {}).allowDemoMode) throw e;
         }
 
-        // 3) Demo
+        // 3) Demo — still use search context when available
         if ((window.SAKAVI_CONFIG || {}).allowDemoMode !== false) {
-            const last = [...messages].reverse().find((m) => m.role === 'user');
             await new Promise((r) => setTimeout(r, 400 + Math.random() * 500));
-            return { text: demoReply(last?.content || '', settings), source: 'demo' };
+            let text = demoReply(userText, settings);
+            if (searchMeta && searchMeta.count > 0) {
+                text =
+                    '**Web search** ran (' +
+                    searchMeta.count +
+                    ' sources).\n\n' +
+                    text +
+                    '\n\n_Connect live API for full synthesis of search results._';
+            }
+            return { text, source: 'demo', search: searchMeta };
         }
 
         throw new Error('No AI backend configured');
@@ -330,5 +510,7 @@ Style:
         modelLabel,
         applyTheme,
         resolveAppearance,
+        webSearchClient,
+        needsWebSearch,
     };
 })();

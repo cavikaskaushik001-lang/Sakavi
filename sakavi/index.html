@@ -50,6 +50,7 @@
             <div class="meta-bar">
                 <button type="button" class="pill" id="modelPill" title="Change model">Sakavi 1</button>
                 <span class="pill" id="lenPill">Balanced</span>
+                <button type="button" class="pill" id="webPill" title="Web search for all models">Web · On</button>
             </div>
             <div class="attach-bar" id="attachBar"></div>
             <div class="composer">
@@ -111,6 +112,20 @@
 
     document.getElementById('modelPill').textContent = Sakavi.modelLabel(settings.model || 'sakavi-1');
     document.getElementById('lenPill').textContent = settings.length.charAt(0).toUpperCase() + settings.length.slice(1);
+    const webPill = document.getElementById('webPill');
+    function syncWebPill() {
+        const on = settings.webSearch !== false;
+        webPill.textContent = on ? 'Web · On' : 'Web · Off';
+        webPill.classList.toggle('on', on);
+    }
+    syncWebPill();
+    webPill.addEventListener('click', () => {
+        const s = Sakavi.loadSettings();
+        s.webSearch = s.webSearch === false ? true : false;
+        settings.webSearch = s.webSearch;
+        Sakavi.saveSettings(s);
+        syncWebPill();
+    });
 
     function formatBytes(n) {
         if (n < 1024) return n + ' B';
@@ -337,18 +352,23 @@
         persist();
 
         const typingEl = appendMsg('bot', '', true);
-        statusLine.textContent = 'Thinking…';
+        const willSearch = settings.webSearch !== false && window.Sakavi.needsWebSearch(
+            contentForApi || displayText, settings
+        );
+        statusLine.textContent = willSearch ? 'Searching web…' : 'Thinking…';
 
         try {
             const history = settings.rememberContext
                 ? chat.messages.map((m) => ({ role: m.role, content: m.content }))
                 : [{ role: 'user', content: contentForApi }];
-            const { text: reply, source } = await Sakavi.generateReply(history, settings);
+            const { text: reply, source, search } = await Sakavi.generateReply(history, settings);
             typingEl.remove();
             chat.messages.push({ role: 'assistant', content: reply, at: Date.now(), source });
             appendMsg('bot', reply);
             persist();
-            statusLine.textContent = source === 'demo' ? 'Demo mode' : 'Ready';
+            statusLine.textContent = search && search.count
+                ? (source === 'demo' ? 'Demo · web ' + search.count : 'Web · ' + search.count + ' sources')
+                : (source === 'demo' ? 'Demo mode' : 'Ready');
             document.getElementById('demoBadge').style.display = source === 'demo' ? 'inline' : 'none';
             speak(reply);
         } catch (e) {

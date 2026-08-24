@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>GitHub Agent · Sakavi</title>
+<meta name="theme-color" content="#07070b">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/settings.css">
+</head>
+<body>
+<div class="app">
+  <div class="top-bar">
+    <a class="back" href="settings" aria-label="Back">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="15 18 9 12 15 6"/></svg>
+    </a>
+    <div class="top-title">GitHub Agent</div>
+  </div>
+  <div class="content">
+    <div class="intro">Secure coding agent for a GitHub repo. Tokens stay on the server (Edge secrets). The agent works on feature branches and opens Pull Requests — never direct pushes to main.</div>
+
+    <div class="group">
+      <div class="item" style="cursor:default;"><div class="body"><div class="label">Connection</div><div class="sub" id="ghStatus">Checking…</div></div></div>
+      <div class="item" style="cursor:default;"><div class="body"><div class="label">Repository</div><div class="sub" id="ghRepo">—</div></div></div>
+      <div class="item" style="cursor:default;"><div class="body"><div class="label">Default branch</div><div class="sub" id="ghBase">—</div></div></div>
+    </div>
+
+    <div class="feature-list" style="margin-top:12px;">
+      <div class="fi">
+        <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+        <div><div class="t">Security</div><div class="d">No tokens in the browser. .env and secret patterns blocked. Deletes need confirmation. Main is write-protected.</div></div>
+      </div>
+      <div class="fi">
+        <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 3v12"/><circle cx="18" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M18 9a9 9 0 0 1-9 9"/></svg></div>
+        <div><div class="t">Workflow</div><div class="d">Inspect → branch → edit → test → commit → push → draft PR → you review & merge.</div></div>
+      </div>
+    </div>
+
+    <button type="button" class="btn primary" id="refreshBtn">Refresh status</button>
+    <div class="note">Setup: deploy <code>github-agent</code> and set secrets <code>GITHUB_TOKEN</code> + <code>GITHUB_REPO</code>. Full guide: <code>docs/GITHUB_AGENT.md</code>.</div>
+    <pre id="ghLog" style="margin:12px 14px;padding:12px;background:var(--row);border-radius:12px;font-size:12px;color:var(--muted);white-space:pre-wrap;max-height:200px;overflow:auto;"></pre>
+  </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.112.3/dist/umd/supabase.min.js"></script>
+<script src="js/config.js"></script>
+<script src="js/supabase-client.js"></script>
+<script src="js/sakavi-core.js"></script>
+<script src="js/agent/github-agent.js"></script>
+<script>
+if (window.Sakavi && Sakavi.applyTheme) Sakavi.applyTheme();
+const log = document.getElementById('ghLog');
+async function refresh() {
+  log.textContent = 'Calling github-agent…';
+  try {
+    if (!window.SakaviGitHub) throw new Error('github-agent.js not loaded');
+    const s = await SakaviGitHub.status();
+    document.getElementById('ghStatus').textContent = s.connected ? 'Connected' : 'Not connected';
+    document.getElementById('ghRepo').textContent = s.repo || '—';
+    document.getElementById('ghBase').textContent = s.defaultBranch || '—';
+    log.textContent = JSON.stringify(s, null, 2);
+  } catch (e) {
+    document.getElementById('ghStatus').textContent = 'Not configured / error';
+    document.getElementById('ghRepo').textContent = '—';
+    document.getElementById('ghBase').textContent = '—';
+    log.textContent = String(e.message || e);
+  }
+}
+document.getElementById('refreshBtn').onclick = refresh;
+refresh();
+</script>
+</body>
+</html>

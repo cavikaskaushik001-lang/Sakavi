@@ -1,0 +1,29 @@
+{
+  "name": "sakavi-sandbox",
+  "version": "1.0.0",
+  "description": "Secure Docker-based coding sandbox for Sakavi AI agent",
+  "main": "src/index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node src/index.js",
+    "build-image": "docker build -t sakavi-sandbox:latest .",
+    "test": "node --test test/*.test.js",
+    "example": "node examples/basic-usage.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "dockerode": "^4.0.2",
+    "uuid": "^9.0.1"
+  },
+  "devDependencies": {},
+  "keywords": [
+    "sandbox",
+    "docker",
+    "ai-agent",
+    "sakavi",
+    "secure-execution"
+  ],
+  "license": "MIT"
+}

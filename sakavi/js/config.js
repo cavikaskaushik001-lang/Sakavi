@@ -6,7 +6,7 @@
 window.SAKAVI_CONFIG = {
     name: 'Sakavi',
     tagline: 'Your AI assistant',
-    version: '1.2.0',
+    version: '1.4.0',
 
     // Same backend as Blyque
     supabaseUrl: 'https://rdhrtsucpmwknlbrcasq.supabase.co',
@@ -14,6 +14,10 @@ window.SAKAVI_CONFIG = {
 
     // Edge function path (deploy on same or other Supabase project)
     chatFunction: 'sakavi-chat',
+
+    // GitHub Coding Agent (token ONLY on edge: GITHUB_TOKEN, GITHUB_REPO secrets)
+    githubAgentFunction: 'github-agent',
+    githubRepo: '', // optional; server uses GITHUB_REPO secret when empty
 
     // Optional: direct OpenAI-compatible API (OpenAI, Groq, Together, etc.)
     // Leave empty to use Supabase edge function or local demo mode.
@@ -26,28 +30,39 @@ window.SAKAVI_CONFIG = {
         {
             id: 'diva',
             name: 'Diva',
-            desc: 'Flagship · strongest all-round AI — reasoning, code, writing, analysis',
+            desc: 'Flagship · web + full tools · strongest all-round AI',
             badge: 'Flagship',
         },
         {
             id: 'sakavi-1',
             name: 'Sakavi 1',
-            desc: 'Balanced · everyday chat & writing',
+            desc: 'Balanced · web search · everyday chat & writing',
             badge: 'Default',
         },
         {
             id: 'vigrah',
             name: 'Vigrah',
-            desc: 'Stronger reasoning · deeper answers',
+            desc: 'Reasoning + web · deeper answers',
             badge: 'Pro',
         },
         {
             id: 'sakavi-mini',
             name: 'Sakavi Mini',
-            desc: 'Fast & light · quick replies',
+            desc: 'Fast · web search · quick replies',
             badge: 'Fast',
         },
     ],
+
+    // Tools available to every model
+    tools: {
+        webSearch: true,       // live web search
+        fetchUrl: true,        // fetch public page text
+        sandbox: true,         // safe analysis sandbox (no host OS access)
+        fullInternet: true,    // models may use live web context
+    },
+
+    // Optional: Brave Search API key for higher-quality results (edge function)
+    // braveSearchKey is set as secret BRAVE_API_KEY on the edge function
 
     // Demo mode replies when no backend key is configured
     allowDemoMode: true,

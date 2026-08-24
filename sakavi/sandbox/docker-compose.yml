@@ -1,0 +1,44 @@
+# Optional local orchestration. Prefer programmatic control via SandboxManager.
+# Never expose docker.sock or host root.
+
+services:
+  sandbox:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: sakavi-sandbox:latest
+    container_name: sakavi-sandbox-demo
+    user: "1000:1000"
+    working_dir: /workspace
+    # Only the project directory is mounted. Never mount host /
+    volumes:
+      - ${PROJECT_PATH:-./example-project}:/workspace:rw
+    # Resource limits (also set programmatically)
+    deploy:
+      resources:
+        limits:
+          cpus: "2.0"
+          memory: 2G
+        reservations:
+          cpus: "0.5"
+          memory: 256M
+    # Process limits
+    pids_limit: 256
+    # Security hardening
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    read_only: false          # workspace is writable; rest of image is fine
+    tmpfs:
+      - /tmp:size=512M,mode=1777
+    # Network: default restricted. Override with "bridge" only when needed.
+    network_mode: none
+    # No privileged, no docker.sock
+    privileged: false
+    environment:
+      - HOME=/home/sandbox
+      - NODE_ENV=development
+    # Prevent accidental host network / secrets
+    env_file: []
+    restart: "no"

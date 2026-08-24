@@ -825,3 +825,8 @@ a.meta-bar .pill,
 .meta-bar a.pill:hover {
     color: var(--accent);
 }
+
+.meta-bar .pill.on {
+    color: var(--accent);
+    background: var(--accent-soft);
+}

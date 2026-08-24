@@ -78,3 +78,38 @@ Works with OpenAI, Groq, Together, Azure OpenAI (compatible path), etc.
 ## Branding
 
 Purple / indigo gradient, name **Sakavi**, logo letter **S**. Change `SAKAVI_CONFIG.name` and CSS variables in `css/sakavi.css` if needed.
+
+
+## GitHub Coding Agent
+
+Secure repo access for the AI coding agent (branch-first + Pull Requests only).
+
+- Edge function: `supabase/functions/github-agent`
+- Client: `js/agent/github-agent.js`
+- Guide: `docs/GITHUB_AGENT.md`
+
+```bash
+supabase secrets set GITHUB_TOKEN=github_pat_... 
+supabase secrets set GITHUB_REPO=owner/repo
+supabase functions deploy github-agent
+```
+
+Never put tokens in `js/` or commit `.env`. Agent refuses writes to `main` and blocks secret files.
+
+## Coding agents
+
+| Module | Path | Role |
+|--------|------|------|
+| GitHub agent | `js/agent/github-agent.js` + Edge function | Branch-first edits, PRs, no direct main |
+| Secure sandbox | `sandbox/` | Isolated Docker runs for test/build/lint |
+
+Docs:
+
+- `docs/GITHUB_AGENT.md` — GitHub workflow & security
+- `docs/SANDBOX.md` — Docker sandbox quick start
+- `sandbox/README.md` — Full sandbox API, limits, security model
+
+Frontend stub (optional, needs a worker): `js/agent/sandbox-client.js`  
+(`createSandbox` / `executeCommand` / `getCommandOutput` / `destroySandbox`)
+
+Typical flow: GitHub agent for branch + file changes → sandbox for `npm test` / build → results in PR body → human merge.
