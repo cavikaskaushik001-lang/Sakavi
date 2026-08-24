@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Appearance · Sakavi</title>
+<meta name="theme-color" content="#000">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/settings.css">
+</head>
+<body>
+<div class="app">
+  <div class="top-bar">
+    <a class="back" href="settings.html" aria-label="Back">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="15 18 9 12 15 6"/></svg>
+    </a>
+    <div class="top-title">Appearance</div>
+  </div>
+  
+<div class="content">
+  <div class="intro">Choose how Sakavi looks on this device.</div>
+  <div class="group">
+    <div class="radio-row" data-v="System (Default)"><div class="body"><div class="label">System</div><div class="sub">Match device setting</div></div><div class="radio on"></div></div>
+    <div class="radio-row" data-v="Dark"><div class="body"><div class="label">Dark</div></div><div class="radio"></div></div>
+    <div class="radio-row" data-v="Light"><div class="body"><div class="label">Light</div></div><div class="radio"></div></div>
+  </div>
+</div>
+
+</div>
+<script src="js/config.js"></script>
+<script src="js/sakavi-core.js"></script>
+<script>
+function pref(key, def) {
+  try { const s = JSON.parse(localStorage.getItem('sakavi_settings_v1')||'{}'); return s[key] ?? def; } catch(_) { return def; }
+}
+function setPref(key, val) {
+  try {
+    const s = JSON.parse(localStorage.getItem('sakavi_settings_v1')||'{}');
+    s[key] = val;
+    localStorage.setItem('sakavi_settings_v1', JSON.stringify(s));
+  } catch(_) {}
+}
+
+function paint(v){ document.querySelectorAll('.radio-row').forEach(r=>r.querySelector('.radio').classList.toggle('on', r.dataset.v===v)); }
+const cur = pref('appearance','System (Default)'); paint(cur);
+document.querySelectorAll('.radio-row').forEach(r=>r.onclick=()=>{ setPref('appearance', r.dataset.v); paint(r.dataset.v); });
+
+</script>
+</body>
+</html>

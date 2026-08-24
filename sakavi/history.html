@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>History · Sakavi</title>
+    <meta name="theme-color" content="#0e0e14">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/sakavi.css">
+</head>
+<body>
+    <div class="app">
+        <header class="header">
+            <a class="icon-btn" href="index.html" aria-label="Back">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="15 18 9 12 15 6"/></svg>
+            </a>
+            <div class="header-title"><h1>History</h1><p>Saved on this device</p></div>
+            <button class="icon-btn" id="clearAll" title="Clear all" aria-label="Clear all">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+            </button>
+        </header>
+        <div class="page-content" id="list"></div>
+    </div>
+    <script src="js/sakavi-core.js"></script>
+    <script>
+        function when(ts) {
+            const d = new Date(ts);
+            const now = new Date();
+            if (d.toDateString() === now.toDateString()) return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            return d.toLocaleDateString();
+        }
+        function render() {
+            const chats = Sakavi.loadChats();
+            const list = document.getElementById('list');
+            if (!chats.length) {
+                list.innerHTML = '<div class="empty">No chats yet.<br><a href="index.html" style="color:#a78bfa">Start one</a></div>';
+                return;
+            }
+            list.innerHTML = '<div class="card" style="padding:0;"></div>';
+            const card = list.querySelector('.card');
+            chats.forEach(c => {
+                const row = document.createElement('div');
+                row.className = 'chat-item';
+                row.innerHTML = `<div class="meta"><h4>${(c.title || 'Chat').replace(/</g,'&lt;')}</h4><p>${when(c.updatedAt)} · ${(c.messages||[]).length} messages</p></div><button type="button" class="del">Delete</button>`;
+                row.querySelector('.meta').addEventListener('click', () => location.href = 'index.html?c=' + c.id);
+                row.querySelector('.del').addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    if (confirm('Delete this chat?')) { Sakavi.deleteChat(c.id); render(); }
+                });
+                card.appendChild(row);
+            });
+        }
+        document.getElementById('clearAll').addEventListener('click', () => {
+            if (confirm('Delete all chats on this device?')) {
+                localStorage.removeItem('sakavi_chats_v1');
+                render();
+            }
+        });
+        render();
+    </script>
+</body>
+</html>

@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Voice · Sakavi</title>
+<meta name="theme-color" content="#000">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/settings.css">
+</head>
+<body>
+<div class="app">
+  <div class="top-bar">
+    <a class="back" href="settings.html" aria-label="Back">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="15 18 9 12 15 6"/></svg>
+    </a>
+    <div class="top-title">Voice</div>
+  </div>
+  
+<div class="content">
+  <div class="intro">Voice input and spoken replies (browser support required).</div>
+  <div class="group">
+    <div class="row-toggle"><div class="body"><div class="label">Voice input</div><div class="sub">Use microphone in chat</div></div><label class="switch"><input type="checkbox" id="voiceIn"><span></span></label></div>
+    <div class="row-toggle"><div class="body"><div class="label">Read replies aloud</div><div class="sub">Text-to-speech for answers</div></div><label class="switch"><input type="checkbox" id="voiceOut"><span></span></label></div>
+  </div>
+  <div class="section-title">Voice</div>
+  <div class="group">
+    <div class="radio-row" data-v="default"><div class="body"><div class="label">System default</div></div><div class="radio on"></div></div>
+    <div class="radio-row" data-v="soft"><div class="body"><div class="label">Soft</div></div><div class="radio"></div></div>
+  </div>
+</div>
+
+</div>
+<script src="js/config.js"></script>
+<script src="js/sakavi-core.js"></script>
+<script>
+function pref(key, def) {
+  try { const s = JSON.parse(localStorage.getItem('sakavi_settings_v1')||'{}'); return s[key] ?? def; } catch(_) { return def; }
+}
+function setPref(key, val) {
+  try {
+    const s = JSON.parse(localStorage.getItem('sakavi_settings_v1')||'{}');
+    s[key] = val;
+    localStorage.setItem('sakavi_settings_v1', JSON.stringify(s));
+  } catch(_) {}
+}
+
+['voiceIn','voiceOut'].forEach(id=>{
+  const el=document.getElementById(id);
+  el.checked=!!pref(id,false);
+  el.onchange=()=>setPref(id, el.checked);
+});
+function paint(v){ document.querySelectorAll('.radio-row').forEach(r=>r.querySelector('.radio').classList.toggle('on', r.dataset.v===v)); }
+paint(pref('voiceStyle','default'));
+document.querySelectorAll('.radio-row').forEach(r=>r.onclick=()=>{ setPref('voiceStyle', r.dataset.v); paint(r.dataset.v); });
+
+</script>
+</body>
+</html>

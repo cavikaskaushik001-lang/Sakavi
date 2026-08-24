@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Safety · Sakavi</title>
+<meta name="theme-color" content="#000">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/settings.css">
+</head>
+<body>
+<div class="app">
+  <div class="top-bar">
+    <a class="back" href="settings.html" aria-label="Back">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="15 18 9 12 15 6"/></svg>
+    </a>
+    <div class="top-title">Safety</div>
+  </div>
+  <div class="content"><div class="intro">Content filters and reporting tools.</div><div class="group"><div class="row-toggle">
+      <div class="body"><div class="label">Sensitive content filter</div><div class="sub">Reduce sensitive material in replies</div></div>
+      <label class="switch"><input type="checkbox" id="safetyFilter" checked><span></span></label>
+    </div><div class="row-toggle">
+      <div class="body"><div class="label">Show safety warnings</div><div class="sub">Warn before risky topics</div></div>
+      <label class="switch"><input type="checkbox" id="safetyWarn" checked><span></span></label>
+    </div></div></div>
+</div>
+<script src="js/config.js"></script>
+<script src="js/sakavi-core.js"></script>
+<script>
+function pref(key, def) {
+  try { const s = JSON.parse(localStorage.getItem('sakavi_settings_v1')||'{}'); return s[key] ?? def; } catch(_) { return def; }
+}
+function setPref(key, val) {
+  try {
+    const s = JSON.parse(localStorage.getItem('sakavi_settings_v1')||'{}');
+    s[key] = val;
+    localStorage.setItem('sakavi_settings_v1', JSON.stringify(s));
+  } catch(_) {}
+}
+
+const ids = ['safetyFilter', 'safetyWarn'];
+ids.forEach(id => {
+  const el = document.getElementById(id);
+  const v = pref(id, el.checked);
+  el.checked = !!v;
+  el.addEventListener('change', () => setPref(id, el.checked));
+});
+
+</script>
+</body>
+</html>

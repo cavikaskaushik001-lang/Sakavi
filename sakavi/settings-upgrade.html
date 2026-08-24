@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Upgrade plan · Sakavi</title>
+<meta name="theme-color" content="#000">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/settings.css">
+</head>
+<body>
+<div class="app">
+  <div class="top-bar">
+    <a class="back" href="settings.html" aria-label="Back">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="15 18 9 12 15 6"/></svg>
+    </a>
+    <div class="top-title">Upgrade plan</div>
+  </div>
+  
+<div class="content">
+  <div class="intro">Unlock higher limits, priority access, and advanced models.</div>
+  <div class="group">
+    <div class="item" style="cursor:default;"><div class="body"><div class="label">Sakavi Free</div><div class="sub">Current plan · standard limits</div></div></div>
+    <div class="item" style="cursor:default;"><div class="body"><div class="label">Sakavi Plus</div><div class="sub">₹299/mo · higher limits, priority</div></div></div>
+    <div class="item" style="cursor:default;"><div class="body"><div class="label">Sakavi Pro</div><div class="sub">₹999/mo · max context & models</div></div></div>
+  </div>
+  <button type="button" class="btn primary" onclick="alert('Connect payment provider in production.')">Upgrade plan</button>
+  <div class="note">Billing is not connected in this build. UI is ready for Razorpay / Stripe.</div>
+</div>
+
+</div>
+<script src="js/config.js"></script>
+<script src="js/sakavi-core.js"></script>
+<script>
+function pref(key, def) {
+  try { const s = JSON.parse(localStorage.getItem('sakavi_settings_v1')||'{}'); return s[key] ?? def; } catch(_) { return def; }
+}
+function setPref(key, val) {
+  try {
+    const s = JSON.parse(localStorage.getItem('sakavi_settings_v1')||'{}');
+    s[key] = val;
+    localStorage.setItem('sakavi_settings_v1', JSON.stringify(s));
+  } catch(_) {}
+}
+
+</script>
+</body>
+</html>

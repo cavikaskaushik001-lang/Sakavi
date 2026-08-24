@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Storage · Sakavi</title>
+<meta name="theme-color" content="#000">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/settings.css">
+</head>
+<body>
+<div class="app">
+  <div class="top-bar">
+    <a class="back" href="settings.html" aria-label="Back">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="15 18 9 12 15 6"/></svg>
+    </a>
+    <div class="top-title">Storage</div>
+  </div>
+  
+<div class="content">
+  <div class="intro">Manage on-device chat storage.</div>
+  <div class="group">
+    <div class="item" style="cursor:default;"><div class="body"><div class="label">Chats on device</div><div class="sub" id="chatCount">—</div></div></div>
+    <div class="item" style="cursor:default;"><div class="body"><div class="label">Estimated size</div><div class="sub" id="chatSize">—</div></div></div>
+  </div>
+  <button type="button" class="btn danger" id="clearChats">Delete all chats</button>
+</div>
+
+</div>
+<script src="js/config.js"></script>
+<script src="js/sakavi-core.js"></script>
+<script>
+function pref(key, def) {
+  try { const s = JSON.parse(localStorage.getItem('sakavi_settings_v1')||'{}'); return s[key] ?? def; } catch(_) { return def; }
+}
+function setPref(key, val) {
+  try {
+    const s = JSON.parse(localStorage.getItem('sakavi_settings_v1')||'{}');
+    s[key] = val;
+    localStorage.setItem('sakavi_settings_v1', JSON.stringify(s));
+  } catch(_) {}
+}
+
+try {
+  const raw = localStorage.getItem('sakavi_chats_v1')||'[]';
+  const chats = JSON.parse(raw);
+  document.getElementById('chatCount').textContent = chats.length + ' conversations';
+  document.getElementById('chatSize').textContent = (raw.length/1024).toFixed(1) + ' KB';
+} catch(_){}
+document.getElementById('clearChats').onclick = () => {
+  if(confirm('Delete all chats on this device?')) {
+    localStorage.removeItem('sakavi_chats_v1');
+    location.reload();
+  }
+};
+
+</script>
+</body>
+</html>

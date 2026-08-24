@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Personalization · Sakavi</title>
+<meta name="theme-color" content="#000">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/settings.css">
+</head>
+<body>
+<div class="app">
+  <div class="top-bar">
+    <a class="back" href="settings.html" aria-label="Back">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="15 18 9 12 15 6"/></svg>
+    </a>
+    <div class="top-title">Personalization</div>
+  </div>
+  
+<div class="content">
+  <div class="intro">Help Sakavi respond in a way that fits you. These preferences stay on this device unless you sync an account.</div>
+  <div class="section-title">Custom instructions</div>
+  <div class="field"><label>What should Sakavi know about you?</label><textarea id="aboutYou" placeholder="e.g. I'm a CA student preparing for finals…"></textarea></div>
+  <div class="field"><label>How should Sakavi respond?</label><textarea id="howRespond" placeholder="e.g. Be concise, use bullet points, explain like a tutor…"></textarea></div>
+  <div class="section-title">Tone</div>
+  <div class="group">
+    <div class="chip-row" id="tones">
+      <button type="button" class="chip" data-v="friendly">Friendly</button>
+      <button type="button" class="chip" data-v="professional">Professional</button>
+      <button type="button" class="chip" data-v="tutor">Tutor</button>
+      <button type="button" class="chip" data-v="witty">Witty</button>
+    </div>
+  </div>
+  <button type="button" class="btn primary" id="savePer">Save</button>
+</div>
+
+</div>
+<script src="js/config.js"></script>
+<script src="js/sakavi-core.js"></script>
+<script>
+function pref(key, def) {
+  try { const s = JSON.parse(localStorage.getItem('sakavi_settings_v1')||'{}'); return s[key] ?? def; } catch(_) { return def; }
+}
+function setPref(key, val) {
+  try {
+    const s = JSON.parse(localStorage.getItem('sakavi_settings_v1')||'{}');
+    s[key] = val;
+    localStorage.setItem('sakavi_settings_v1', JSON.stringify(s));
+  } catch(_) {}
+}
+
+document.getElementById('aboutYou').value = pref('aboutYou','');
+document.getElementById('howRespond').value = pref('howRespond','');
+const persona = pref('persona','friendly');
+document.querySelectorAll('#tones .chip').forEach(c => {
+  c.classList.toggle('on', c.dataset.v === persona);
+  c.addEventListener('click', () => {
+    document.querySelectorAll('#tones .chip').forEach(x => x.classList.remove('on'));
+    c.classList.add('on'); setPref('persona', c.dataset.v);
+  });
+});
+document.getElementById('savePer').onclick = () => {
+  setPref('aboutYou', document.getElementById('aboutYou').value);
+  setPref('howRespond', document.getElementById('howRespond').value);
+  alert('Saved');
+};
+
+</script>
+</body>
+</html>

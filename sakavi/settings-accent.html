@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Accent color · Sakavi</title>
+<meta name="theme-color" content="#000">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/settings.css">
+</head>
+<body>
+<div class="app">
+  <div class="top-bar">
+    <a class="back" href="settings.html" aria-label="Back">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="15 18 9 12 15 6"/></svg>
+    </a>
+    <div class="top-title">Accent color</div>
+  </div>
+  
+<div class="content">
+  <div class="intro">Highlight color for buttons and selections.</div>
+  <div class="group" id="colors"></div>
+</div>
+
+</div>
+<script src="js/config.js"></script>
+<script src="js/sakavi-core.js"></script>
+<script>
+function pref(key, def) {
+  try { const s = JSON.parse(localStorage.getItem('sakavi_settings_v1')||'{}'); return s[key] ?? def; } catch(_) { return def; }
+}
+function setPref(key, val) {
+  try {
+    const s = JSON.parse(localStorage.getItem('sakavi_settings_v1')||'{}');
+    s[key] = val;
+    localStorage.setItem('sakavi_settings_v1', JSON.stringify(s));
+  } catch(_) {}
+}
+
+const colors = [
+  {id:'blue', label:'Blue', hex:'#0a84ff'},
+  {id:'purple', label:'Purple', hex:'#a78bfa'},
+  {id:'green', label:'Green', hex:'#30d158'},
+  {id:'orange', label:'Orange', hex:'#ff9f0a'},
+  {id:'pink', label:'Pink', hex:'#ff375f'},
+];
+const cur = pref('accentId','blue');
+const box = document.getElementById('colors');
+colors.forEach(c=>{
+  const row = document.createElement('div');
+  row.className = 'radio-row';
+  row.innerHTML = `<div class="color-swatch" style="background:${c.hex}"></div><div class="body"><div class="label">${c.label}</div></div><div class="radio ${c.id===cur?'on':''}"></div>`;
+  row.onclick = () => {
+    setPref('accentId', c.id); setPref('accent', c.hex); setPref('accentLabel', c.label);
+    document.documentElement.style.setProperty('--accent', c.hex);
+    box.querySelectorAll('.radio').forEach(r=>r.classList.remove('on'));
+    row.querySelector('.radio').classList.add('on');
+  };
+  box.appendChild(row);
+});
+
+</script>
+</body>
+</html>

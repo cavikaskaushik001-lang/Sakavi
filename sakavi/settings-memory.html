@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Memory · Sakavi</title>
+<meta name="theme-color" content="#000">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/settings.css">
+</head>
+<body>
+<div class="app">
+  <div class="top-bar">
+    <a class="back" href="settings.html" aria-label="Back">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="15 18 9 12 15 6"/></svg>
+    </a>
+    <div class="top-title">Memory</div>
+  </div>
+  
+<div class="content">
+  <div class="intro">Sakavi can remember details you share across chats. You can turn memory off or delete individual memories anytime.</div>
+  <div class="group">
+    <div class="row-toggle">
+      <div class="body"><div class="label">Reference saved memories</div><div class="sub">Let Sakavi use memory when answering</div></div>
+      <label class="switch"><input type="checkbox" id="memoryOn" checked><span></span></label>
+    </div>
+  </div>
+  <div class="section-title">Saved memories</div>
+  <div class="group" id="memList"></div>
+  <button type="button" class="btn danger" id="clearMem">Clear all memories</button>
+</div>
+
+</div>
+<script src="js/config.js"></script>
+<script src="js/sakavi-core.js"></script>
+<script>
+function pref(key, def) {
+  try { const s = JSON.parse(localStorage.getItem('sakavi_settings_v1')||'{}'); return s[key] ?? def; } catch(_) { return def; }
+}
+function setPref(key, val) {
+  try {
+    const s = JSON.parse(localStorage.getItem('sakavi_settings_v1')||'{}');
+    s[key] = val;
+    localStorage.setItem('sakavi_settings_v1', JSON.stringify(s));
+  } catch(_) {}
+}
+
+const KEY = 'sakavi_memories';
+function load(){ try{return JSON.parse(localStorage.getItem(KEY)||'[]')}catch(_){return[]} }
+function save(a){ localStorage.setItem(KEY, JSON.stringify(a)); }
+function seed(){
+  let a = load();
+  if(!a.length){ a = ['Prefers concise answers','Studying CA Intermediate','Lives in India']; save(a); }
+  return a;
+}
+function render(){
+  const a = seed(); const box = document.getElementById('memList'); box.innerHTML='';
+  if(!a.length){ box.innerHTML='<div class="empty">No memories yet</div>'; return; }
+  a.forEach((m,i)=>{
+    const d=document.createElement('div'); d.className='mem-item';
+    d.innerHTML=`<div class="txt">${m.replace(/</g,'&lt;')}</div><button type="button" class="del" data-i="${i}">Delete</button>`;
+    box.appendChild(d);
+  });
+  box.querySelectorAll('.del').forEach(b=>b.onclick=()=>{ const arr=load(); arr.splice(+b.dataset.i,1); save(arr); render(); });
+}
+const on = document.getElementById('memoryOn');
+on.checked = !!pref('memoryOn', true);
+on.onchange = () => setPref('memoryOn', on.checked);
+document.getElementById('clearMem').onclick = () => { if(confirm('Clear all memories?')){ save([]); render(); } };
+render();
+
+</script>
+</body>
+</html>

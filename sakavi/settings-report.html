@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Report bug · Sakavi</title>
+<meta name="theme-color" content="#000">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/settings.css">
+</head>
+<body>
+<div class="app">
+  <div class="top-bar">
+    <a class="back" href="settings.html" aria-label="Back">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="15 18 9 12 15 6"/></svg>
+    </a>
+    <div class="top-title">Report bug</div>
+  </div>
+  
+<div class="content">
+  <div class="intro">Tell us what went wrong. Reports stay on-device in this demo build.</div>
+  <div class="field"><label>What happened?</label><textarea id="bug" placeholder="Describe the issue…"></textarea></div>
+  <button type="button" class="btn primary" id="sendBug">Submit</button>
+</div>
+
+</div>
+<script src="js/config.js"></script>
+<script src="js/sakavi-core.js"></script>
+<script>
+function pref(key, def) {
+  try { const s = JSON.parse(localStorage.getItem('sakavi_settings_v1')||'{}'); return s[key] ?? def; } catch(_) { return def; }
+}
+function setPref(key, val) {
+  try {
+    const s = JSON.parse(localStorage.getItem('sakavi_settings_v1')||'{}');
+    s[key] = val;
+    localStorage.setItem('sakavi_settings_v1', JSON.stringify(s));
+  } catch(_) {}
+}
+
+document.getElementById('sendBug').onclick=()=>{
+  const t=document.getElementById('bug').value.trim();
+  if(!t) return alert('Please describe the issue');
+  const list=JSON.parse(localStorage.getItem('sakavi_bugs')||'[]');
+  list.push({t, at:Date.now()});
+  localStorage.setItem('sakavi_bugs', JSON.stringify(list));
+  alert('Thanks — report saved.');
+  history.back();
+};
+
+</script>
+</body>
+</html>
