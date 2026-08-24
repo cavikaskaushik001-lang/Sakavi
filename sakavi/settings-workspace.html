@@ -30,6 +30,7 @@
 <script src="js/config.js"></script>
 <script src="js/sakavi-core.js"></script>
 <script>
+if (window.Sakavi && Sakavi.applyTheme) Sakavi.applyTheme();
 function pref(key, def) {
   try { const s = JSON.parse(localStorage.getItem('sakavi_settings_v1')||'{}'); return s[key] ?? def; } catch(_) { return def; }
 }

@@ -1,17 +1,47 @@
-/* Sakavi settings — premium ChatGPT-style list UI */
+/* Sakavi settings — premium list UI · blue accent + light mode */
 :root {
     --bg: #07070b;
     --row: #16161f;
     --row-hover: #1e1e2a;
     --text: #f4f4f8;
     --muted: #8b8b9e;
-    --accent: #a78bfa;
-    --accent-2: #818cf8;
-    --accent-grad: linear-gradient(135deg, #a78bfa 0%, #818cf8 50%, #60a5fa 100%);
-    --danger: #f43f5e;
+    --accent: #0a84ff;
+    --accent-soft: rgba(10, 132, 255, 0.15);
+    --danger: #ff453a;
     --sep: #000;
     --radius: 14px;
     --success: #30d158;
+    --top-bg: rgba(0, 0, 0, 0.85);
+}
+
+html[data-theme="light"] {
+    --bg: #f2f2f7;
+    --row: #ffffff;
+    --row-hover: #e8e8ed;
+    --text: #1c1c1e;
+    --muted: #8e8e93;
+    --accent: #007aff;
+    --accent-soft: rgba(0, 122, 255, 0.12);
+    --danger: #ff3b30;
+    --sep: #f2f2f7;
+    --success: #34c759;
+    --top-bg: rgba(242, 242, 247, 0.9);
+}
+
+@media (prefers-color-scheme: light) {
+    html[data-theme="system"] {
+        --bg: #f2f2f7;
+        --row: #ffffff;
+        --row-hover: #e8e8ed;
+        --text: #1c1c1e;
+        --muted: #8e8e93;
+        --accent: #007aff;
+        --accent-soft: rgba(0, 122, 255, 0.12);
+        --danger: #ff3b30;
+        --sep: #f2f2f7;
+        --success: #34c759;
+        --top-bg: rgba(242, 242, 247, 0.9);
+    }
 }
 
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -28,7 +58,7 @@ html, body {
 .top-bar {
     display: flex; align-items: center; gap: 8px;
     padding: 12px 16px; padding-top: calc(12px + env(safe-area-inset-top));
-    position: sticky; top: 0; z-index: 20; background: rgba(0,0,0,0.85);
+    position: sticky; top: 0; z-index: 20; background: var(--top-bg);
     backdrop-filter: blur(16px);
 }
 .back {
@@ -45,9 +75,9 @@ html, body {
 }
 .avatar {
     width: 72px; height: 72px; border-radius: 50%;
-    background: linear-gradient(135deg, #f5a89a, #e8887a);
+    background: var(--accent);
     display: inline-flex; align-items: center; justify-content: center;
-    font-size: 26px; font-weight: 700; color: #3a1a14; position: relative;
+    font-size: 26px; font-weight: 700; color: #fff; position: relative;
 }
 .avatar .edit {
     position: absolute; right: -2px; bottom: -2px;
@@ -72,6 +102,7 @@ html, body {
     background: var(--row);
     border-radius: var(--radius);
     overflow: hidden;
+    border: 0.5px solid rgba(128,128,128,0.12);
 }
 
 .item {
@@ -174,7 +205,7 @@ html, body {
     padding: 8px 12px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.12);
     background: transparent; color: #ccc; font-size: 13px; font-family: inherit; cursor: pointer;
 }
-.chip.on { border-color: var(--accent); background: rgba(10,132,255,0.15); color: #64b5ff; }
+.chip.on { border-color: var(--accent); background: rgba(10,132,255,0.15); color: var(--accent); }
 .note { padding: 8px 20px 20px; font-size: 13px; color: var(--muted); line-height: 1.45; }
 .mem-item {
     display: flex; gap: 12px; padding: 12px 16px;
@@ -200,25 +231,24 @@ html, body {
 .price-card:active { transform: scale(0.99); }
 .price-card.featured {
     border-color: rgba(167,139,250,0.45);
-    background: linear-gradient(160deg, rgba(167,139,250,0.12) 0%, var(--row) 55%);
-    box-shadow: 0 0 0 1px rgba(167,139,250,0.15), 0 8px 24px rgba(0,0,0,0.35);
+    background: var(--row); border-color: var(--accent) !important;
+    box-shadow: 0 0 0 1px var(--accent-soft), 0 8px 24px rgba(0,0,0,0.12);
 }
 .price-card .badge {
     position: absolute; top: 12px; right: 12px;
     font-size: 11px; font-weight: 700; letter-spacing: 0.03em;
     padding: 4px 8px; border-radius: 999px;
-    background: var(--accent-grad); color: #fff;
+    background: var(--accent); color: #fff;
 }
 .price-card .plan-name {
     font-size: 17px; font-weight: 700; margin: 0 0 4px;
 }
 .price-card .plan-price {
     font-size: 22px; font-weight: 800; letter-spacing: -0.02em;
-    background: var(--accent-grad); -webkit-background-clip: text; background-clip: text;
-    -webkit-text-fill-color: transparent; margin: 0 0 10px;
+    color: var(--accent); margin: 0 0 10px;
 }
 .price-card .plan-price span {
-    font-size: 13px; font-weight: 500; -webkit-text-fill-color: var(--muted);
+    font-size: 13px; font-weight: 500; color: var(--muted);
 }
 .price-card ul {
     list-style: none; margin: 0; padding: 0;
@@ -248,7 +278,7 @@ html, body {
 .feature-list .fi:last-child { border-bottom: none; }
 .feature-list .fi .ico {
     width: 36px; height: 36px; border-radius: 10px;
-    background: rgba(167,139,250,0.15); color: var(--accent);
+    background: var(--accent-soft); color: var(--accent);
     display: flex; align-items: center; justify-content: center; flex-shrink: 0;
 }
 .feature-list .fi .ico svg { width: 18px; height: 18px; }
@@ -257,20 +287,20 @@ html, body {
 
 /* Profile hero polish */
 .profile-hero .avatar {
-    background: var(--accent-grad);
+    background: var(--accent);
     color: #fff;
-    box-shadow: 0 4px 20px rgba(167,139,250,0.35);
+    box-shadow: 0 4px 20px rgba(10,132,255,0.25);
 }
 .btn.primary {
-    background: var(--accent-grad);
-    box-shadow: 0 4px 16px rgba(167,139,250,0.3);
+    background: var(--accent);
+    box-shadow: 0 4px 16px rgba(10,132,255,0.25);
 }
 .btn.primary:active { opacity: 0.9; }
 
 .chip.on {
     border-color: var(--accent);
-    background: rgba(167,139,250,0.15);
-    color: #c4b5fd;
+    background: var(--accent-soft);
+    color: var(--accent);
 }
 .radio.on { border-color: var(--accent); }
 .radio.on::after { background: var(--accent); }

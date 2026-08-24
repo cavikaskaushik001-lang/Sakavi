@@ -18,11 +18,11 @@
   </div>
   
 <div class="content">
-  <div class="intro">Choose how Sakavi looks on this device.</div>
+  <div class="intro">Choose light or dark. System follows your device setting. Accent is blue across the app.</div>
   <div class="group">
     <div class="radio-row" data-v="System (Default)"><div class="body"><div class="label">System</div><div class="sub">Match device setting</div></div><div class="radio on"></div></div>
-    <div class="radio-row" data-v="Dark"><div class="body"><div class="label">Dark</div></div><div class="radio"></div></div>
-    <div class="radio-row" data-v="Light"><div class="body"><div class="label">Light</div></div><div class="radio"></div></div>
+    <div class="radio-row" data-v="Dark"><div class="body"><div class="label">Dark</div><div class="sub">Black surfaces · blue accents</div></div><div class="radio"></div></div>
+    <div class="radio-row" data-v="Light"><div class="body"><div class="label">Light</div><div class="sub">Bright surfaces · blue accents</div></div><div class="radio"></div></div>
   </div>
 </div>
 
@@ -42,9 +42,14 @@ function setPref(key, val) {
 }
 
 function paint(v){ document.querySelectorAll('.radio-row').forEach(r=>r.querySelector('.radio').classList.toggle('on', r.dataset.v===v)); }
-const cur = pref('appearance','System (Default)'); paint(cur);
-document.querySelectorAll('.radio-row').forEach(r=>r.onclick=()=>{ setPref('appearance', r.dataset.v); paint(r.dataset.v); });
-
+const cur = pref('appearance','System (Default)');
+paint(cur);
+if (window.Sakavi) Sakavi.applyTheme(cur);
+document.querySelectorAll('.radio-row').forEach(r=>r.onclick=()=>{
+  setPref('appearance', r.dataset.v);
+  paint(r.dataset.v);
+  if (window.Sakavi) Sakavi.applyTheme(r.dataset.v);
+});
 </script>
 </body>
 </html>

@@ -14,10 +14,10 @@
 }
 .auth-logo {
   width: 64px; height: 64px; border-radius: 18px;
-  background: var(--accent-grad);
+  background: var(--accent);
   display: flex; align-items: center; justify-content: center;
   font-size: 28px; font-weight: 800; color: #fff;
-  box-shadow: 0 8px 28px rgba(167,139,250,0.35);
+  box-shadow: 0 8px 28px rgba(10,132,255,0.3);
   margin: 0 auto 20px;
 }
 .auth-wrap h1 {
@@ -109,6 +109,8 @@
 <script src="js/sakavi-core.js"></script>
 <script>
 (function () {
+  if (window.Sakavi && Sakavi.applyTheme) Sakavi.applyTheme();
+
   const err = document.getElementById('err');
   const ok = document.getElementById('ok');
   const form = document.getElementById('loginForm');

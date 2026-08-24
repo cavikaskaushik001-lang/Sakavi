@@ -285,6 +285,35 @@ Style:
         return t;
     }
 
+
+    function resolveAppearance(raw) {
+        const v = (raw || 'System (Default)').toString();
+        if (/light/i.test(v)) return 'light';
+        if (/dark/i.test(v)) return 'dark';
+        return 'system';
+    }
+
+    function applyTheme(appearance) {
+        const mode = resolveAppearance(appearance != null ? appearance : loadSettings().appearance);
+        document.documentElement.setAttribute('data-theme', mode);
+        const meta = document.querySelector('meta[name="theme-color"]');
+        if (meta) {
+            const light = mode === 'light' || (mode === 'system' && window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches);
+            meta.setAttribute('content', light ? '#f2f2f7' : '#0e0e14');
+        }
+        return mode;
+    }
+
+    // Apply as early as possible when script loads
+    try {
+        applyTheme();
+        if (window.matchMedia) {
+            window.matchMedia('(prefers-color-scheme: light)').addEventListener('change', () => {
+                if (resolveAppearance(loadSettings().appearance) === 'system') applyTheme('System (Default)');
+            });
+        }
+    } catch (_) {}
+
     window.Sakavi = {
         loadSettings,
         saveSettings,
@@ -299,5 +328,7 @@ Style:
         buildSystemPrompt,
         getModelMeta,
         modelLabel,
+        applyTheme,
+        resolveAppearance,
     };
 })();

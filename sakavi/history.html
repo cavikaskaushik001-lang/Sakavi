@@ -23,6 +23,7 @@
     </div>
     <script src="js/sakavi-core.js"></script>
     <script>
+        if (window.Sakavi && Sakavi.applyTheme) Sakavi.applyTheme();
         function when(ts) {
             const d = new Date(ts);
             const now = new Date();
@@ -33,7 +34,7 @@
             const chats = Sakavi.loadChats();
             const list = document.getElementById('list');
             if (!chats.length) {
-                list.innerHTML = '<div class="empty">No chats yet.<br><a href="./" style="color:#a78bfa">Start one</a></div>';
+                list.innerHTML = '<div class="empty">No chats yet.<br><a href="./" style="color:var(--accent)">Start one</a></div>';
                 return;
             }
             list.innerHTML = '<div class="card" style="padding:0;"></div>';

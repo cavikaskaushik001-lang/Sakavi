@@ -48,7 +48,7 @@
 
         <div class="composer-wrap">
             <div class="meta-bar">
-                <a class="pill" id="modelPill" href="settings-model" title="Change model">Sakavi 1</a>
+                <button type="button" class="pill" id="modelPill" title="Change model">Sakavi 1</button>
                 <span class="pill" id="lenPill">Balanced</span>
             </div>
             <div class="attach-bar" id="attachBar"></div>
@@ -68,6 +68,14 @@
             </div>
             <input type="file" id="fileInput" multiple accept="image/*,.pdf,.txt,.md,.csv,.json,.js,.ts,.py,.html,.css,.doc,.docx" hidden>
         </div>
+    </div>
+
+
+    <div class="sheet-backdrop" id="modelBackdrop"></div>
+    <div class="model-sheet" id="modelSheet" role="dialog" aria-label="Choose model">
+        <div class="handle"></div>
+        <h3>Choose model</h3>
+        <div id="modelSheetList"></div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.112.3/dist/umd/supabase.min.js"></script>
@@ -94,6 +102,7 @@
     const attachBtn = document.getElementById('attachBtn');
     const micBtn = document.getElementById('micBtn');
     const settings = Sakavi.loadSettings();
+    Sakavi.applyTheme(settings.appearance);
 
     /** @type {{id:string,name:string,size:number,type:string,preview?:string,text?:string}[]} */
     let pendingFiles = [];
@@ -467,6 +476,44 @@
     document.querySelectorAll('.chip').forEach((c) => {
         c.addEventListener('click', () => send(c.dataset.q));
     });
+
+
+    // —— In-chat model picker ——
+    const modelBackdrop = document.getElementById('modelBackdrop');
+    const modelSheet = document.getElementById('modelSheet');
+    const modelSheetList = document.getElementById('modelSheetList');
+
+    function openModelSheet() {
+        const models = (window.SAKAVI_CONFIG && window.SAKAVI_CONFIG.models) || [];
+        const cur = Sakavi.loadSettings().model || 'sakavi-1';
+        modelSheetList.innerHTML = '';
+        models.forEach((m) => {
+            const row = document.createElement('div');
+            row.className = 'model-option' + (m.id === cur ? ' on' : '');
+            row.innerHTML =
+                '<div><div class="mo-name"></div><div class="mo-desc"></div></div><div class="mo-check">✓</div>';
+            row.querySelector('.mo-name').textContent = m.name + (m.badge ? ' · ' + m.badge : '');
+            row.querySelector('.mo-desc').textContent = m.desc || '';
+            row.addEventListener('click', () => {
+                const s = Sakavi.loadSettings();
+                s.model = m.id;
+                Sakavi.saveSettings(s);
+                settings.model = m.id;
+                document.getElementById('modelPill').textContent = Sakavi.modelLabel(m.id);
+                closeModelSheet();
+            });
+            modelSheetList.appendChild(row);
+        });
+        modelBackdrop.classList.add('open');
+        modelSheet.classList.add('open');
+    }
+    function closeModelSheet() {
+        modelBackdrop.classList.remove('open');
+        modelSheet.classList.remove('open');
+    }
+    document.getElementById('modelPill').addEventListener('click', openModelSheet);
+    modelBackdrop.addEventListener('click', closeModelSheet);
+
 
     renderAll();
     if (chat.messages.some((m) => m.source === 'demo')) {

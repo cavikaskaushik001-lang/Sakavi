@@ -70,13 +70,15 @@
 <script src="js/sakavi-core.js"></script>
 <script>
 (function(){
+  if (window.Sakavi && Sakavi.applyTheme) Sakavi.applyTheme();
+
   try {
     const s = JSON.parse(localStorage.getItem('sakavi_settings_v1')||'{}');
     if (s.displayName) document.getElementById('displayName').textContent = s.displayName;
     if (s.email) document.getElementById('emailSub').textContent = s.email;
     if (s.phone) document.getElementById('phoneSub').textContent = s.phone;
     if (s.appearance) document.getElementById('appSub').textContent = s.appearance;
-    if (s.accentLabel) document.getElementById('accentSub').innerHTML = '<span class="dot" style="display:inline-block;vertical-align:middle;margin-right:6px;background:'+(s.accent||'#a78bfa')+'"></span>'+s.accentLabel;
+    if (s.accentLabel) document.getElementById('accentSub').innerHTML = '<span class="dot" style="display:inline-block;vertical-align:middle;margin-right:6px;background:'+(s.accent||'#0a84ff')+'"></span>'+s.accentLabel;
     if (s.workspace) document.getElementById('wsSub').textContent = s.workspace;
     if (window.Sakavi && Sakavi.modelLabel) {
       document.getElementById('modelSub').textContent = Sakavi.modelLabel(s.model || 'sakavi-1');
