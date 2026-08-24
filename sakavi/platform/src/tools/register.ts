@@ -214,6 +214,92 @@ export function registerAllTools(): void {
   toolGateway.register('workspace.list', async () => {
     throw new PlatformError('USE_SANDBOX', 'Use sandbox.execute for listing');
   });
+
+
+  toolGateway.register('process.inspect', async (args) => {
+    const a = args as { sandboxId: string };
+    return sandboxService.execute(a.sandboxId, 'ps aux | head -50');
+  });
+
+  toolGateway.register('git.status', async (args) => {
+    const a = args as { sandboxId: string };
+    return sandboxService.execute(a.sandboxId, 'git status');
+  });
+
+  toolGateway.register('git.diff', async (args) => {
+    const a = args as { sandboxId: string };
+    return sandboxService.execute(a.sandboxId, 'git diff');
+  });
+
+  toolGateway.register('git.log', async (args) => {
+    const a = args as { sandboxId: string; n?: number };
+    const n = a.n ?? 10;
+    return sandboxService.execute(a.sandboxId, `git log -n ${n} --oneline`);
+  });
+
+  toolGateway.register('github.issue', async (args) => {
+    requireToken();
+    return { ok: true, note: 'Wire to GitHub issues API', args };
+  });
+
+  toolGateway.register('database.schema', async () => {
+    return { tables: [], note: 'Wire DB schema inspector' };
+  });
+
+  toolGateway.register('cloud.describe', async (args) => {
+    return { resource: (args as { resource: string }).resource, metadata: {}, note: 'Wire cloud read API' };
+  });
+
+  toolGateway.register('logs.read', async (args) => {
+    const a = args as { source: string; lines?: number };
+    return { lines: [], source: a.source, note: 'Wire log backend' };
+  });
+
+  toolGateway.register('monitoring.health', async (args) => {
+    return { ok: true, service: (args as { service: string }).service, detail: 'stub healthy' };
+  });
+
+  toolGateway.register('artifact.create', async (args) => {
+    const a = args as { name: string; content: string };
+    return { id: 'art-' + Date.now().toString(36), name: a.name };
+  });
+
+  toolGateway.register('filesystem.read', async (args) => {
+    const a = args as { path: string; sandboxId?: string };
+    if (!a.sandboxId) return { content: '', note: 'sandboxId required for read' };
+    return sandboxService.execute(a.sandboxId, `cat ${JSON.stringify(a.path)}`);
+  });
+
+  toolGateway.register('filesystem.write', async (args) => {
+    throw new PlatformError('USE_SANDBOX', 'Prefer controlled write via sandbox or github.upsert_file');
+  });
+
+  toolGateway.register('filesystem.search', async (args) => {
+    const a = args as { pattern: string; sandboxId?: string; path?: string };
+    if (!a.sandboxId) return { matches: [] };
+    return sandboxService.execute(
+      a.sandboxId,
+      `grep -R -n -E ${JSON.stringify(a.pattern)} ${a.path || '.'} | head -50`
+    );
+  });
+
+  toolGateway.register('debug.typecheck', async (args) => {
+    const a = args as { sandboxId: string };
+    return sandboxService.execute(a.sandboxId, 'npx tsc --noEmit || true');
+  });
+
+  toolGateway.register('debug.test', async (args) => {
+    const a = args as { sandboxId: string; command?: string };
+    return sandboxService.execute(a.sandboxId, a.command || 'npm test --if-present');
+  });
+
+  toolGateway.register('debug.session', async (args) => {
+    return { note: 'Use agents/debugger runDebugSession from orchestrator', args };
+  });
+
+  toolGateway.register('security.research', async (args) => {
+    return { note: 'Use runSecurityResearch from security module', args };
+  });
 }
 
 function tryToken(): string | null {

@@ -106,3 +106,43 @@ See `docs/SECURITY_REPORT.md` for residual risks and assumptions.
 | `sandbox/` (Docker image + JS manager) | Preserved; TS `platform/src/sandbox` is the hardened runtime used by the gateway |
 
 Wire Edge functions or a worker to `initPlatform()` + agent `run*` exports when deploying the control plane.
+
+## DIVA cognitive pipeline
+
+```
+INPUT → INTENT → CONTEXT → DECOMPOSE → RISK → PLAN → CRITIC
+  → EXECUTE → OBSERVE → VERIFY → RECOVER → FINAL
+```
+
+Modules under `src/agents/diva/`:
+
+| File | Role |
+|------|------|
+| `index.ts` | Pipeline orchestration, pause/resume/cancel/emergencyStop |
+| `planner.ts` | Intent analysis + hierarchical decomposition |
+| `plan-critic.ts` | Independent plan review |
+| `risk-engine.ts` | Impact/reversibility risk (not model self-score) |
+| `executor.ts` | Delegate + verify success criteria |
+| `recovery.ts` | Failure classification + policy |
+| `memory.ts` | Working + validated long-term memory |
+| `timeline.ts` | Scrubbed execution trace |
+| `types.ts` | Durable `DivaTaskState`, `PlanStep`, etc. |
+
+Controls:
+
+```ts
+import { runDiva, pauseTask, cancelTask, emergencyStop, getTaskTimeline } from '@sakavi/platform';
+
+const out = await runDiva({
+  userId: 'u1',
+  objective: 'Fix login bug, run tests, open draft PR',
+  projectPath: '/abs/path/to/repo',
+});
+
+// Operator only
+pauseTask(out.taskId);
+cancelTask(out.taskId);
+emergencyStop('incident', 'ops@example.com');
+```
+
+DIVA **cannot** self-approve HIGH/CRITICAL capabilities or deactivate the kill switch.

@@ -10,7 +10,10 @@
     "test": "node --import tsx --test tests/**/*.test.ts",
     "test:security": "node --import tsx --test tests/security/**/*.test.ts",
     "typecheck": "tsc -p tsconfig.json --noEmit",
-    "lint": "tsc -p tsconfig.json --noEmit"
+    "lint": "tsc -p tsconfig.json --noEmit",
+    "self:diagnose": "tsx src/self-dev/cli.ts diagnose",
+    "self:audit": "tsx src/self-dev/cli.ts audit",
+    "self:repair": "tsx src/self-dev/cli.ts repair"
   },
   "engines": {
     "node": ">=20"
