@@ -113,3 +113,9 @@ Frontend stub (optional, needs a worker): `js/agent/sandbox-client.js`
 (`createSandbox` / `executeCommand` / `getCommandOutput` / `destroySandbox`)
 
 Typical flow: GitHub agent for branch + file changes → sandbox for `npm test` / build → results in PR body → human merge.
+
+## Agent platform (control plane)
+
+See `platform/README.md` and `docs/SECURITY_REPORT.md`.
+
+TypeScript strict agent runtime with DIVA orchestrator, capability manager, policy engine, tool gateway, hardened sandbox integration, audit, approvals, and kill switch. Existing UI and Supabase Edge functions remain supported.
