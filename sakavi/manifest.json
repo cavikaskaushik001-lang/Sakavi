@@ -2,7 +2,7 @@
   "name": "Sakavi",
   "short_name": "Sakavi",
   "description": "Sakavi AI assistant",
-  "start_url": "./index.html",
+  "start_url": "./",
   "display": "standalone",
   "background_color": "#07070b",
   "theme_color": "#0e0e14",

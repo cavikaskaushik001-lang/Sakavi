@@ -282,18 +282,118 @@ body {
     backdrop-filter: blur(12px);
 }
 
+.attach-bar {
+    display: none;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 0 4px 10px;
+}
+.attach-bar.has-files {
+    display: flex;
+}
+.attach-chip {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    max-width: 100%;
+    padding: 6px 10px 6px 6px;
+    background: var(--elevated);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    font-size: 12px;
+    color: var(--text);
+}
+.attach-chip img {
+    width: 36px;
+    height: 36px;
+    object-fit: cover;
+    border-radius: 8px;
+    background: #111;
+}
+.attach-chip .fi {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    background: rgba(167, 139, 250, 0.15);
+    color: var(--accent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-size: 11px;
+    font-weight: 700;
+}
+.attach-chip .meta {
+    min-width: 0;
+    flex: 1;
+}
+.attach-chip .name {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-weight: 500;
+}
+.attach-chip .size {
+    color: var(--muted);
+    font-size: 11px;
+}
+.attach-chip .rm {
+    border: none;
+    background: transparent;
+    color: var(--muted);
+    font-size: 18px;
+    line-height: 1;
+    cursor: pointer;
+    padding: 4px;
+}
+
 .composer {
     display: flex;
     align-items: flex-end;
-    gap: 8px;
+    gap: 4px;
     background: var(--elevated);
     border: 1px solid var(--border);
     border-radius: 20px;
-    padding: 6px 6px 6px 14px;
+    padding: 6px 6px 6px 6px;
 }
 
 .composer:focus-within {
     border-color: rgba(167, 139, 250, 0.45);
+}
+
+.composer-tools {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    padding-bottom: 4px;
+    flex-shrink: 0;
+}
+
+.tool-btn {
+    width: 38px;
+    height: 38px;
+    border-radius: 12px;
+    border: none;
+    background: transparent;
+    color: var(--muted);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+.tool-btn:hover,
+.tool-btn:active {
+    color: var(--text);
+    background: rgba(255, 255, 255, 0.06);
+}
+.tool-btn.recording {
+    color: #f43f5e;
+    background: rgba(244, 63, 94, 0.15);
+    animation: pulse-rec 1.2s ease-in-out infinite;
+}
+@keyframes pulse-rec {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(244, 63, 94, 0.35); }
+    50% { box-shadow: 0 0 0 6px rgba(244, 63, 94, 0); }
 }
 
 .composer textarea {
@@ -306,8 +406,9 @@ body {
     line-height: 1.4;
     resize: none;
     max-height: 140px;
-    padding: 10px 0;
+    padding: 10px 4px;
     outline: none;
+    min-width: 0;
 }
 
 .composer textarea::placeholder {
@@ -333,6 +434,34 @@ body {
     cursor: default;
 }
 
+/* File bubble in chat */
+.msg .file-card {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
+    padding: 8px 10px;
+    background: rgba(0, 0, 0, 0.25);
+    border-radius: 12px;
+    font-size: 13px;
+}
+.msg.user .file-card {
+    background: rgba(255, 255, 255, 0.08);
+}
+.msg .file-card img {
+    width: 44px;
+    height: 44px;
+    object-fit: cover;
+    border-radius: 8px;
+}
+.msg .file-card .fn {
+    font-weight: 600;
+}
+.msg .file-card .fs {
+    color: var(--muted);
+    font-size: 11px;
+}
+
 .meta-bar {
     display: flex;
     gap: 8px;
@@ -345,6 +474,16 @@ body {
     padding: 3px 8px;
     border-radius: 6px;
     background: rgba(255, 255, 255, 0.04);
+    color: inherit;
+    text-decoration: none;
+}
+a.meta-bar .pill,
+.meta-bar a.pill {
+    cursor: pointer;
+}
+.meta-bar a.pill:active {
+    background: rgba(167, 139, 250, 0.15);
+    color: #c4b5fd;
 }
 
 /* Settings / list pages */

@@ -71,7 +71,25 @@ Deno.serve(async (req) => {
       content: String(m.content || '').slice(0, 8000),
     }));
 
-    const model = body.model === 'sakavi-study' ? OPENAI_MODEL : (body.model || OPENAI_MODEL);
+    // Map Sakavi model ids → upstream model (override with secrets if needed)
+    const requested = String(body.model || '').toLowerCase();
+    let model = OPENAI_MODEL;
+    if (requested === 'diva') {
+      // Flagship: prefer strongest configured model
+      model =
+        Deno.env.get('OPENAI_MODEL_DIVA') ||
+        Deno.env.get('OPENAI_MODEL_FLAGSHIP') ||
+        Deno.env.get('OPENAI_MODEL_PRO') ||
+        OPENAI_MODEL;
+    } else if (requested === 'vigrah') {
+      model = Deno.env.get('OPENAI_MODEL_VIGRAH') || Deno.env.get('OPENAI_MODEL_PRO') || OPENAI_MODEL;
+    } else if (requested === 'sakavi-mini') {
+      model = Deno.env.get('OPENAI_MODEL_MINI') || 'gpt-4o-mini';
+    } else if (requested === 'sakavi-1' || requested === 'sakavi-study') {
+      model = OPENAI_MODEL;
+    } else if (requested) {
+      model = requested; // allow passthrough of real model ids
+    }
 
     const res = await fetch(`${OPENAI_BASE_URL}/chat/completions`, {
       method: 'POST',
@@ -80,10 +98,15 @@ Deno.serve(async (req) => {
         Authorization: `Bearer ${OPENAI_API_KEY}`,
       },
       body: JSON.stringify({
-        model: OPENAI_MODEL,
+        model,
         messages: trimmed,
-        temperature: body.model === 'sakavi-study' ? 0.4 : 0.7,
-        max_tokens: body.length === 'short' ? 400 : body.length === 'detailed' ? 1600 : 900,
+        temperature:
+          requested === 'diva' ? 0.55 :
+          requested === 'sakavi-study' || requested === 'vigrah' ? 0.4 : 0.7,
+        max_tokens:
+          requested === 'diva'
+            ? (body.length === 'short' ? 800 : body.length === 'detailed' ? 3200 : 2000)
+            : body.length === 'short' ? 400 : body.length === 'detailed' ? 1600 : 900,
       }),
     });
 

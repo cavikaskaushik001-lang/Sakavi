@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Model · Sakavi</title>
+<meta name="theme-color" content="#07070b">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/settings.css">
+<style>
+.model-card {
+  display: flex; align-items: flex-start; gap: 14px;
+  padding: 16px; border-bottom: 0.5px solid rgba(255,255,255,0.06);
+  cursor: pointer;
+}
+.model-card:last-child { border-bottom: none; }
+.model-card:active { background: var(--row-hover); }
+.model-card .radio {
+  margin-top: 2px;
+}
+.model-card .name {
+  font-size: 16px; font-weight: 600; display: flex; align-items: center; gap: 8px;
+}
+.model-card .badge-m {
+  font-size: 10px; font-weight: 700; letter-spacing: 0.04em;
+  padding: 2px 7px; border-radius: 999px;
+  background: rgba(167,139,250,0.2); color: #c4b5fd;
+}
+.model-card .badge-m.pro { background: linear-gradient(135deg,#a78bfa,#60a5fa); color: #fff; }
+.model-card .badge-m.fast { background: rgba(48,209,88,0.2); color: #30d158; }
+.model-card .badge-m.flagship {
+  background: linear-gradient(135deg,#f472b6 0%,#a78bfa 50%,#60a5fa 100%);
+  color: #fff;
+  box-shadow: 0 2px 10px rgba(167,139,250,0.35);
+}
+.model-card .desc {
+  font-size: 13px; color: var(--muted); margin-top: 4px; line-height: 1.4;
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="top-bar">
+    <a class="back" href="settings" aria-label="Back">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="15 18 9 12 15 6"/></svg>
+    </a>
+    <div class="top-title">Model</div>
+  </div>
+
+  <div class="content">
+    <div class="intro">Choose which Sakavi model answers you. <strong>Diva</strong> is the flagship — strongest all-round model. Change anytime; applies to new messages.</div>
+    <div class="group" id="modelList"></div>
+    <div class="note">Vigrah is tuned for deeper reasoning. Sakavi Mini prioritizes speed. Live model routing depends on your edge function / API configuration.</div>
+  </div>
+</div>
+<script src="js/config.js"></script>
+<script src="js/sakavi-core.js"></script>
+<script>
+(function () {
+  const models = (window.SAKAVI_CONFIG && window.SAKAVI_CONFIG.models) || [];
+  const settings = Sakavi.loadSettings();
+  const current = settings.model || 'sakavi-1';
+  const list = document.getElementById('modelList');
+
+  function badgeClass(b) {
+    if (!b) return '';
+    const x = b.toLowerCase();
+    if (x === 'flagship' || x === 'max') return 'flagship';
+    if (x === 'pro') return 'pro';
+    if (x === 'fast') return 'fast';
+    return '';
+  }
+
+  models.forEach((m) => {
+    const row = document.createElement('div');
+    row.className = 'model-card';
+    row.innerHTML =
+      '<div class="radio ' + (m.id === current ? 'on' : '') + '"></div>' +
+      '<div class="body">' +
+      '<div class="name">' + m.name +
+      (m.badge ? ' <span class="badge-m ' + badgeClass(m.badge) + '">' + m.badge + '</span>' : '') +
+      '</div>' +
+      '<div class="desc">' + (m.desc || '') + '</div>' +
+      '</div>';
+    row.addEventListener('click', () => {
+      const s = Sakavi.loadSettings();
+      s.model = m.id;
+      Sakavi.saveSettings(s);
+      list.querySelectorAll('.radio').forEach((r) => r.classList.remove('on'));
+      row.querySelector('.radio').classList.add('on');
+    });
+    list.appendChild(row);
+  });
+})();
+</script>
+</body>
+</html>

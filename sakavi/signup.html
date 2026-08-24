@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Sign up · Sakavi</title>
+<meta name="theme-color" content="#07070b">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/settings.css">
+<style>
+.auth-wrap {
+  max-width: 400px; margin: 0 auto; padding: 24px 20px 40px;
+  padding-top: calc(24px + env(safe-area-inset-top));
+}
+.auth-logo {
+  width: 64px; height: 64px; border-radius: 18px;
+  background: var(--accent-grad);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 28px; font-weight: 800; color: #fff;
+  box-shadow: 0 8px 28px rgba(167,139,250,0.35);
+  margin: 0 auto 20px;
+}
+.auth-wrap h1 {
+  text-align: center; font-size: 24px; font-weight: 800; margin: 0 0 6px;
+  letter-spacing: -0.03em;
+}
+.auth-wrap .sub {
+  text-align: center; color: var(--muted); font-size: 14px; margin: 0 0 28px;
+}
+.auth-field {
+  margin-bottom: 12px;
+  background: var(--row); border-radius: 14px; padding: 14px 16px;
+  border: 1px solid rgba(255,255,255,0.06);
+}
+.auth-field label {
+  display: block; font-size: 12px; color: var(--muted); margin-bottom: 6px; font-weight: 500;
+}
+.auth-field input {
+  width: 100%; border: none; background: transparent; color: #fff;
+  font-size: 16px; font-family: inherit; outline: none;
+}
+.auth-error {
+  display: none; margin: 0 0 12px; padding: 10px 14px;
+  background: rgba(244,63,94,0.12); color: #fb7185;
+  border-radius: 12px; font-size: 13px; line-height: 1.4;
+}
+.auth-error.show { display: block; }
+.auth-ok {
+  display: none; margin: 0 0 12px; padding: 10px 14px;
+  background: rgba(48,209,88,0.12); color: #4ade80;
+  border-radius: 12px; font-size: 13px;
+}
+.auth-ok.show { display: block; }
+.auth-actions { margin-top: 8px; }
+.auth-actions .btn { margin: 0 0 10px; width: 100%; }
+.auth-footer {
+  text-align: center; margin-top: 24px; font-size: 14px; color: var(--muted);
+}
+.auth-footer a { color: var(--accent); text-decoration: none; font-weight: 600; }
+.hint {
+  font-size: 12px; color: var(--muted); margin: -4px 0 14px; line-height: 1.4;
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="auth-wrap">
+    <div class="auth-logo">S</div>
+    <h1>Create account</h1>
+    <p class="sub">Join Sakavi — chat with Sakavi 1, Vigrah & Mini</p>
+
+    <div class="auth-error" id="err"></div>
+    <div class="auth-ok" id="ok"></div>
+
+    <form id="signupForm" autocomplete="on">
+      <div class="auth-field">
+        <label for="name">Name</label>
+        <input id="name" type="text" name="name" placeholder="Your name" required autocomplete="name">
+      </div>
+      <div class="auth-field">
+        <label for="email">Email</label>
+        <input id="email" type="email" name="email" placeholder="you@example.com" required autocomplete="email">
+      </div>
+      <div class="auth-field">
+        <label for="password">Password</label>
+        <input id="password" type="password" name="password" placeholder="At least 6 characters" required minlength="6" autocomplete="new-password">
+      </div>
+      <p class="hint">By signing up you agree to use Sakavi responsibly. Chat history stays on this device unless you connect a live backend.</p>
+      <div class="auth-actions">
+        <button type="submit" class="btn primary" id="submitBtn">Create account</button>
+      </div>
+    </form>
+
+    <div class="auth-footer">
+      Already have an account? <a href="login">Log in</a>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.112.3/dist/umd/supabase.min.js"></script>
+<script src="js/config.js"></script>
+<script src="js/supabase-client.js"></script>
+<script src="js/sakavi-core.js"></script>
+<script>
+(function () {
+  const err = document.getElementById('err');
+  const ok = document.getElementById('ok');
+  const form = document.getElementById('signupForm');
+  const btn = document.getElementById('submitBtn');
+
+  function showErr(msg) {
+    ok.classList.remove('show');
+    err.textContent = msg;
+    err.classList.add('show');
+  }
+  function showOk(msg) {
+    err.classList.remove('show');
+    ok.textContent = msg;
+    ok.classList.add('show');
+  }
+
+  function localUsers() {
+    try { return JSON.parse(localStorage.getItem('sakavi_users_v1') || '[]'); } catch (_) { return []; }
+  }
+  function saveLocalUsers(list) {
+    localStorage.setItem('sakavi_users_v1', JSON.stringify(list));
+  }
+  function setLocalSession(user) {
+    localStorage.setItem('sakavi_local_session', JSON.stringify({
+      email: user.email,
+      name: user.name,
+      at: Date.now(),
+    }));
+    try {
+      const s = JSON.parse(localStorage.getItem('sakavi_settings_v1') || '{}');
+      s.displayName = user.name;
+      s.email = user.email;
+      localStorage.setItem('sakavi_settings_v1', JSON.stringify(s));
+    } catch (_) {}
+  }
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    err.classList.remove('show');
+    ok.classList.remove('show');
+    btn.disabled = true;
+    btn.textContent = 'Creating…';
+
+    const name = document.getElementById('name').value.trim();
+    const email = document.getElementById('email').value.trim().toLowerCase();
+    const password = document.getElementById('password').value;
+
+    if (password.length < 6) {
+      showErr('Password must be at least 6 characters.');
+      btn.disabled = false;
+      btn.textContent = 'Create account';
+      return;
+    }
+
+    try {
+      // 1) Try Supabase Auth
+      const client = window.sakaviSupabase;
+      if (client) {
+        const { data, error } = await client.auth.signUp({
+          email,
+          password,
+          options: { data: { name } },
+        });
+        if (!error && data) {
+          setLocalSession({ email, name });
+          if (data.session) {
+            showOk('Account created. Redirecting…');
+            setTimeout(() => { location.href = './'; }, 600);
+          } else {
+            showOk('Account created. Check your email to confirm, or continue — local session is ready.');
+            setTimeout(() => { location.href = './'; }, 1200);
+          }
+          // Also mirror locally for offline demo
+          const users = localUsers().filter((u) => u.email !== email);
+          users.push({ email, password, name, createdAt: Date.now() });
+          saveLocalUsers(users);
+          return;
+        }
+        // Fall through on common failures (email already registered handled below)
+        if (error && /already|registered|exists/i.test(error.message || '')) {
+          showErr('This email is already registered. Try logging in.');
+          return;
+        }
+      }
+
+      // 2) Local demo signup
+      const users = localUsers();
+      if (users.some((u) => u.email === email)) {
+        showErr('This email is already registered on this device. Log in instead.');
+        return;
+      }
+      users.push({ email, password, name, createdAt: Date.now() });
+      saveLocalUsers(users);
+      setLocalSession({ email, name });
+      showOk('Account created (local). Redirecting…');
+      setTimeout(() => { location.href = './'; }, 500);
+    } catch (ex) {
+      showErr(ex.message || 'Something went wrong');
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Create account';
+    }
+  });
+})();
+</script>
+</body>
+</html>

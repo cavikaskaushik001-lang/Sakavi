@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Voice · Sakavi</title>
 <meta name="theme-color" content="#07070b">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/settings.css">
 </head>
 <body>
@@ -18,16 +18,43 @@
   </div>
   
 <div class="content">
-  <div class="intro">Voice input and spoken replies (browser support required).</div>
+  <div class="intro">Talk to Sakavi with the mic on the chat screen, and optionally hear replies spoken aloud. Works best in Chrome / Edge on HTTPS or localhost.</div>
+
   <div class="group">
-    <div class="row-toggle"><div class="body"><div class="label">Voice input</div><div class="sub">Use microphone in chat</div></div><label class="switch"><input type="checkbox" id="voiceIn"><span></span></label></div>
-    <div class="row-toggle"><div class="body"><div class="label">Read replies aloud</div><div class="sub">Text-to-speech for answers</div></div><label class="switch"><input type="checkbox" id="voiceOut"><span></span></label></div>
+    <div class="row-toggle">
+      <div class="body">
+        <div class="label">Voice input</div>
+        <div class="sub">Show mic button and allow speech-to-text</div>
+      </div>
+      <label class="switch"><input type="checkbox" id="voiceIn" checked><span></span></label>
+    </div>
+    <div class="row-toggle">
+      <div class="body">
+        <div class="label">Read replies aloud</div>
+        <div class="sub">Text-to-speech for assistant answers</div>
+      </div>
+      <label class="switch"><input type="checkbox" id="voiceOut"><span></span></label>
+    </div>
   </div>
-  <div class="section-title">Voice</div>
+
+  <div class="section-title">Spoken style</div>
   <div class="group">
-    <div class="radio-row" data-v="default"><div class="body"><div class="label">System default</div></div><div class="radio on"></div></div>
-    <div class="radio-row" data-v="soft"><div class="body"><div class="label">Soft</div></div><div class="radio"></div></div>
+    <div class="radio-row" data-v="default"><div class="body"><div class="label">System default</div><div class="sub">Natural pace</div></div><div class="radio on"></div></div>
+    <div class="radio-row" data-v="soft"><div class="body"><div class="label">Soft</div><div class="sub">Slightly slower, warmer tone</div></div><div class="radio"></div></div>
   </div>
+
+  <div class="feature-list" style="margin-top:12px;">
+    <div class="fi">
+      <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg></div>
+      <div><div class="t">How to use</div><div class="d">Tap the mic in the composer, speak, then send. Tap again to stop early.</div></div>
+    </div>
+    <div class="fi">
+      <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg></div>
+      <div><div class="t">Files + voice</div><div class="d">You can attach images or documents and still use the mic for your question.</div></div>
+    </div>
+  </div>
+
+  <div class="note">Mic permission is required by the browser. If speech fails, check site permissions and use a supported browser.</div>
 </div>
 
 </div>
@@ -47,13 +74,12 @@ function setPref(key, val) {
 
 ['voiceIn','voiceOut'].forEach(id=>{
   const el=document.getElementById(id);
-  el.checked=!!pref(id,false);
+  el.checked = id === 'voiceIn' ? !!pref(id, true) : !!pref(id, false);
   el.onchange=()=>setPref(id, el.checked);
 });
 function paint(v){ document.querySelectorAll('.radio-row').forEach(r=>r.querySelector('.radio').classList.toggle('on', r.dataset.v===v)); }
 paint(pref('voiceStyle','default'));
 document.querySelectorAll('.radio-row').forEach(r=>r.onclick=()=>{ setPref('voiceStyle', r.dataset.v); paint(r.dataset.v); });
-
 </script>
 </body>
 </html>

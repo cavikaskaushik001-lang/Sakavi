@@ -25,6 +25,7 @@
 
   <div class="section-title">My Sakavi</div>
   <div class="group">
+    <a class="item" href="settings-model"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg></div><div class="body"><div class="label">Model</div><div class="sub" id="modelSub">Sakavi 1</div></div><div class="trail"><span class="chev">›</span></div></a>
     <a class="item" href="settings-personalization"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg></div><div class="body"><div class="label">Personalization</div></div><div class="trail"><span class="chev">›</span></div></a>
     <a class="item" href="settings-memory"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg></div><div class="body"><div class="label">Memory</div></div><div class="trail"><span class="chev">›</span></div></a>
     <a class="item" href="settings-plugins"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></div><div class="body"><div class="label">Plugins</div></div><div class="trail"><span class="chev">›</span></div></a>
@@ -61,7 +62,8 @@
   </div>
 
   <div class="group" style="margin-top:12px;">
-    <a class="item danger" href="#" id="logoutBtn"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></div><div class="body"><div class="label">Log out</div></div></a>
+    <a class="item" href="login" id="loginRow"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg></div><div class="body"><div class="label">Log in / Sign up</div><div class="sub" id="authSub">Guest</div></div><div class="trail"><span class="chev">›</span></div></a>
+    <a class="item danger" href="#" id="logoutBtn" style="display:none;"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></div><div class="body"><div class="label">Log out</div></div></a>
   </div>
 </div>
 <script src="js/config.js"></script>
@@ -74,14 +76,38 @@
     if (s.email) document.getElementById('emailSub').textContent = s.email;
     if (s.phone) document.getElementById('phoneSub').textContent = s.phone;
     if (s.appearance) document.getElementById('appSub').textContent = s.appearance;
-    if (s.accentLabel) document.getElementById('accentSub').innerHTML = '<span class="dot" style="display:inline-block;vertical-align:middle;margin-right:6px;background:'+(s.accent||'#0a84ff')+'"></span>'+s.accentLabel;
+    if (s.accentLabel) document.getElementById('accentSub').innerHTML = '<span class="dot" style="display:inline-block;vertical-align:middle;margin-right:6px;background:'+(s.accent||'#a78bfa')+'"></span>'+s.accentLabel;
     if (s.workspace) document.getElementById('wsSub').textContent = s.workspace;
+    if (window.Sakavi && Sakavi.modelLabel) {
+      document.getElementById('modelSub').textContent = Sakavi.modelLabel(s.model || 'sakavi-1');
+    }
   } catch(_){}
+
+  let loggedIn = false;
+  try {
+    const sess = JSON.parse(localStorage.getItem('sakavi_local_session') || 'null');
+    if (sess && sess.email) {
+      loggedIn = true;
+      document.getElementById('authSub').textContent = sess.email;
+      if (sess.name) document.getElementById('displayName').textContent = sess.name;
+    }
+  } catch(_){}
+  if (loggedIn) {
+    document.getElementById('logoutBtn').style.display = '';
+    document.getElementById('loginRow').querySelector('.label').textContent = 'Account';
+  }
+
   document.getElementById('logoutBtn').addEventListener('click', e => {
     e.preventDefault();
     if (confirm('Log out of Sakavi on this device?')) {
       localStorage.removeItem('sakavi-auth');
-      alert('Logged out (local session cleared).');
+      localStorage.removeItem('sakavi_local_session');
+      try {
+        const s = JSON.parse(localStorage.getItem('sakavi_settings_v1')||'{}');
+        delete s.displayName; delete s.email;
+        localStorage.setItem('sakavi_settings_v1', JSON.stringify(s));
+      } catch(_){}
+      alert('Logged out.');
       location.href = './';
     }
   });

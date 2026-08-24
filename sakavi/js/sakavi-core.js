@@ -11,7 +11,19 @@
         persona: 'friendly',
         rememberContext: true,
         theme: 'dark',
+        voiceIn: true,
+        voiceOut: false,
+        voiceStyle: 'default',
     };
+
+    function getModelMeta(id) {
+        const list = (window.SAKAVI_CONFIG && window.SAKAVI_CONFIG.models) || [];
+        return list.find((m) => m.id === id) || list[0] || { id: id || 'sakavi-1', name: id || 'Sakavi 1', desc: '' };
+    }
+
+    function modelLabel(id) {
+        return getModelMeta(id).name;
+    }
 
     function loadSettings() {
         try {
@@ -66,6 +78,34 @@
     function buildSystemPrompt(settings) {
         const cfg = window.SAKAVI_CONFIG || {};
         let base = cfg.systemPrompt || 'You are Sakavi, a helpful AI assistant.';
+        const model = settings.model || 'sakavi-1';
+        if (model === 'diva') {
+            base = `You are Diva — the flagship model of the Sakavi family: the strongest, most capable assistant available here.
+
+Identity & quality bar:
+- You are a general-purpose expert system: reasoning, coding, writing, research-style analysis, study help, planning, and creative work.
+- Aim for answers that feel like a top-tier AI product: accurate, structured, and useful on the first try.
+- Match the user's language (Hindi, Hinglish, English, etc.). Never claim to be human.
+
+How you work:
+- For hard problems: think step-by-step, state assumptions, then conclude. Show key intermediate reasoning when it helps.
+- For code: write correct, runnable solutions; explain briefly; note edge cases and tests when relevant.
+- For study (exams, CA, concepts): definitions → intuition → steps → short practice check.
+- For writing: clear structure, strong opening, and a natural voice unless a tone is requested.
+- For files/images the user shares: use any provided text or captions; ask for missing detail only when necessary.
+- When unsure, say so and suggest what would improve the answer. Do not invent citations or facts.
+
+Style:
+- Premium and calm — confident without arrogance. Prefer clarity over fluff.
+- Use short paragraphs, headings, or bullets when structure helps. Full depth when the user needs it.
+- If the user asks for “everything” or a broad task, cover the important angles first, then offer deeper dives.`;
+        } else if (model === 'vigrah') {
+            base =
+                'You are Vigrah, the advanced reasoning model in the Sakavi family. Think step-by-step, check assumptions, and give precise, structured answers. Prefer clarity over fluff.';
+        } else if (model === 'sakavi-mini') {
+            base =
+                'You are Sakavi Mini — a fast, lightweight assistant. Keep replies short and practical. Skip long preambles. Prefer 2–5 sentences or tight bullets.';
+        }
         const persona = {
             friendly: 'Tone: warm and conversational.',
             professional: 'Tone: professional and concise.',
@@ -83,11 +123,25 @@
     /** Demo replies when no API configured */
     function demoReply(userText, settings) {
         const q = (userText || '').toLowerCase();
+        const mName = modelLabel(settings.model);
         if (/hello|hi\b|hey|namaste|hola/.test(q)) {
-            return 'Hey — I’m **Sakavi**. Ask me anything: ideas, writing, code, study notes, or plans for the day.';
+            if (settings.model === 'diva') {
+                return 'Hey — I’m **Diva**, Sakavi’s strongest model. Bring the hard stuff: architecture, proofs, full essays, debug sessions, or a plan from zero to ship.';
+            }
+            return 'Hey — I’m **' + mName + '**. Ask me anything: ideas, writing, code, study notes, or plans for the day.';
         }
-        if (/who are you|what are you|tum kaun/.test(q)) {
-            return 'I’m **Sakavi**, your AI assistant. I can help with explanations, drafting, brainstorming, and study-style walkthroughs. Backend is ready for your API / Supabase edge function.';
+        if (/who are you|what are you|tum kaun|model/.test(q)) {
+            if (settings.model === 'diva') {
+                return (
+                    'I’m **Diva** — Sakavi’s flagship model. I’m built for the hardest asks: deep reasoning, full coding workflows, long-form writing, study walkthroughs, and multi-step plans.\n\n' +
+                    'Other models in the family: **Sakavi 1** (balanced), **Vigrah** (reasoning focus), **Sakavi Mini** (speed). Switch anytime from Settings → Model.'
+                );
+            }
+            return (
+                'I’m **' +
+                mName +
+                '** (Sakavi family). Models: **Diva** (flagship), **Sakavi 1**, **Vigrah**, **Sakavi Mini**. Switch from Settings → Model or the pill above the composer.'
+            );
         }
         if (/ca\b|exam|study|syllabus/.test(q)) {
             return 'For study help, share the topic or a question. I’ll break it into steps, key definitions, and a short practice check.\n\nExample: “Explain AS 2 inventory valuation simply.”';
@@ -104,13 +158,26 @@
                 : settings.length === 'detailed'
                   ? 'Here’s a fuller take:\n\n'
                   : '';
+        if (settings.model === 'diva') {
+            return (
+                tip +
+                '**Diva** (demo) received: “' +
+                userText.slice(0, 140) +
+                (userText.length > 140 ? '…' : '') +
+                '”.\n\n' +
+                'In live mode I would structure a full answer: clarify the goal → key options or steps → concrete output (code, outline, or plan) → risks & next actions.\n\n' +
+                '**Demo mode** is on — connect `sakavi-chat` or an OpenAI-compatible API in `js/config.js` for real flagship-quality replies. UI, history, voice, and files already work.'
+            );
+        }
         return (
             tip +
             'I understood: “' +
             userText.slice(0, 120) +
             (userText.length > 120 ? '…' : '') +
             '”.\n\n' +
-            '**Demo mode** is on (no live model key yet). To go live:\n' +
+            '**Demo mode** · model **' +
+            mName +
+            '**. To go live:\n' +
             '1. Deploy Supabase function `sakavi-chat` with `OPENAI_API_KEY`, or\n' +
             '2. Set `openaiCompatUrl` + key in `js/config.js`.\n\n' +
             'Meanwhile, ask another question — history and UI are fully working.'
@@ -230,5 +297,7 @@
         generateReply,
         formatMessage,
         buildSystemPrompt,
+        getModelMeta,
+        modelLabel,
     };
 })();

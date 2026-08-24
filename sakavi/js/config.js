@@ -6,7 +6,7 @@
 window.SAKAVI_CONFIG = {
     name: 'Sakavi',
     tagline: 'Your AI assistant',
-    version: '1.0.0',
+    version: '1.2.0',
 
     // Same backend as Blyque
     supabaseUrl: 'https://rdhrtsucpmwknlbrcasq.supabase.co',
@@ -20,6 +20,34 @@ window.SAKAVI_CONFIG = {
     openaiCompatUrl: '', // e.g. 'https://api.openai.com/v1/chat/completions'
     openaiCompatKey: '', // set only for local testing; prefer edge function secrets
     openaiModel: 'gpt-4o-mini',
+
+    // Available models (id used in settings + edge function)
+    models: [
+        {
+            id: 'diva',
+            name: 'Diva',
+            desc: 'Flagship · strongest all-round AI — reasoning, code, writing, analysis',
+            badge: 'Flagship',
+        },
+        {
+            id: 'sakavi-1',
+            name: 'Sakavi 1',
+            desc: 'Balanced · everyday chat & writing',
+            badge: 'Default',
+        },
+        {
+            id: 'vigrah',
+            name: 'Vigrah',
+            desc: 'Stronger reasoning · deeper answers',
+            badge: 'Pro',
+        },
+        {
+            id: 'sakavi-mini',
+            name: 'Sakavi Mini',
+            desc: 'Fast & light · quick replies',
+            badge: 'Fast',
+        },
+    ],
 
     // Demo mode replies when no backend key is configured
     allowDemoMode: true,

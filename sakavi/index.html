@@ -48,15 +48,25 @@
 
         <div class="composer-wrap">
             <div class="meta-bar">
-                <span class="pill" id="modelPill">Sakavi 1</span>
+                <a class="pill" id="modelPill" href="settings-model" title="Change model">Sakavi 1</a>
                 <span class="pill" id="lenPill">Balanced</span>
             </div>
+            <div class="attach-bar" id="attachBar"></div>
             <div class="composer">
+                <div class="composer-tools">
+                    <button type="button" class="tool-btn" id="attachBtn" title="Attach file" aria-label="Attach file">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
+                    </button>
+                    <button type="button" class="tool-btn" id="micBtn" title="Voice input" aria-label="Voice input">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+                    </button>
+                </div>
                 <textarea id="input" rows="1" placeholder="Message Sakavi…" autocomplete="off"></textarea>
                 <button type="button" class="send-btn" id="sendBtn" aria-label="Send" disabled>
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
                 </button>
             </div>
+            <input type="file" id="fileInput" multiple accept="image/*,.pdf,.txt,.md,.csv,.json,.js,.ts,.py,.html,.css,.doc,.docx" hidden>
         </div>
     </div>
 
@@ -79,24 +89,57 @@
     const input = document.getElementById('input');
     const sendBtn = document.getElementById('sendBtn');
     const statusLine = document.getElementById('statusLine');
+    const attachBar = document.getElementById('attachBar');
+    const fileInput = document.getElementById('fileInput');
+    const attachBtn = document.getElementById('attachBtn');
+    const micBtn = document.getElementById('micBtn');
     const settings = Sakavi.loadSettings();
 
-    document.getElementById('modelPill').textContent = settings.model === 'sakavi-1' ? 'Sakavi 1' : settings.model;
+    /** @type {{id:string,name:string,size:number,type:string,preview?:string,text?:string}[]} */
+    let pendingFiles = [];
+    let recognition = null;
+    let isRecording = false;
+
+    document.getElementById('modelPill').textContent = Sakavi.modelLabel(settings.model || 'sakavi-1');
     document.getElementById('lenPill').textContent = settings.length.charAt(0).toUpperCase() + settings.length.slice(1);
+
+    function formatBytes(n) {
+        if (n < 1024) return n + ' B';
+        if (n < 1024 * 1024) return (n / 1024).toFixed(1) + ' KB';
+        return (n / (1024 * 1024)).toFixed(1) + ' MB';
+    }
+
+    function canSend() {
+        return !!(input.value.trim() || pendingFiles.length);
+    }
 
     function showChatUI() {
         hero.style.display = 'none';
         log.style.display = 'flex';
     }
 
-    function appendMsg(role, content, typing) {
+    function appendMsg(role, content, typing, files) {
         showChatUI();
         const div = document.createElement('div');
         div.className = 'msg ' + (role === 'user' ? 'user' : 'bot');
         if (typing) {
             div.innerHTML = '<div class="bubble"><div class="typing"><span></span><span></span><span></span></div></div>';
         } else {
-            div.innerHTML = '<div class="bubble">' + Sakavi.formatMessage(content) + '</div>';
+            let html = '';
+            if (files && files.length) {
+                files.forEach((f) => {
+                    html += '<div class="file-card">';
+                    if (f.preview) {
+                        html += '<img src="' + f.preview + '" alt="">';
+                    } else {
+                        const ext = (f.name.split('.').pop() || 'FILE').slice(0, 4).toUpperCase();
+                        html += '<div class="fi" style="width:44px;height:44px;border-radius:8px;background:rgba(167,139,250,0.2);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;">' + ext + '</div>';
+                    }
+                    html += '<div><div class="fn">' + (f.name || 'file').replace(/</g, '&lt;') + '</div><div class="fs">' + formatBytes(f.size || 0) + '</div></div></div>';
+                });
+            }
+            html += Sakavi.formatMessage(content || '');
+            div.innerHTML = '<div class="bubble">' + html + '</div>';
         }
         log.appendChild(div);
         log.scrollTop = log.scrollHeight;
@@ -111,25 +154,177 @@
             return;
         }
         showChatUI();
-        chat.messages.forEach((m) => appendMsg(m.role, m.content));
+        chat.messages.forEach((m) => appendMsg(m.role, m.content, false, m.files));
     }
 
     function persist() {
         chat.title = Sakavi.titleFromMessages(chat.messages);
         chat.updatedAt = Date.now();
-        Sakavi.upsertChat(chat);
+        // Strip large previews from history to keep localStorage small
+        const slim = {
+            ...chat,
+            messages: chat.messages.map((m) => {
+                if (!m.files) return m;
+                return {
+                    ...m,
+                    files: m.files.map((f) => ({
+                        name: f.name,
+                        size: f.size,
+                        type: f.type,
+                        preview: f.preview && f.preview.length < 80000 ? f.preview : undefined,
+                    })),
+                };
+            }),
+        };
+        Sakavi.upsertChat(slim);
         history.replaceState(null, '', '?c=' + chat.id);
     }
 
+    function renderAttachBar() {
+        attachBar.innerHTML = '';
+        if (!pendingFiles.length) {
+            attachBar.classList.remove('has-files');
+            sendBtn.disabled = !canSend();
+            return;
+        }
+        attachBar.classList.add('has-files');
+        pendingFiles.forEach((f) => {
+            const chip = document.createElement('div');
+            chip.className = 'attach-chip';
+            let left = '';
+            if (f.preview) {
+                left = '<img src="' + f.preview + '" alt="">';
+            } else {
+                const ext = (f.name.split('.').pop() || 'FILE').slice(0, 4).toUpperCase();
+                left = '<div class="fi">' + ext + '</div>';
+            }
+            chip.innerHTML =
+                left +
+                '<div class="meta"><div class="name"></div><div class="size"></div></div>' +
+                '<button type="button" class="rm" aria-label="Remove">×</button>';
+            chip.querySelector('.name').textContent = f.name;
+            chip.querySelector('.size').textContent = formatBytes(f.size);
+            chip.querySelector('.rm').addEventListener('click', () => {
+                pendingFiles = pendingFiles.filter((x) => x.id !== f.id);
+                renderAttachBar();
+            });
+            attachBar.appendChild(chip);
+        });
+        sendBtn.disabled = !canSend();
+    }
+
+    function readFileAsDataURL(file) {
+        return new Promise((resolve, reject) => {
+            const r = new FileReader();
+            r.onload = () => resolve(r.result);
+            r.onerror = reject;
+            r.readAsDataURL(file);
+        });
+    }
+
+    function readFileAsText(file) {
+        return new Promise((resolve, reject) => {
+            const r = new FileReader();
+            r.onload = () => resolve(String(r.result || ''));
+            r.onerror = reject;
+            r.readAsText(file);
+        });
+    }
+
+    async function addFiles(fileList) {
+        const files = Array.from(fileList || []);
+        for (const file of files) {
+            if (file.size > 8 * 1024 * 1024) {
+                alert(file.name + ' is larger than 8 MB — skipped.');
+                continue;
+            }
+            if (pendingFiles.length >= 5) {
+                alert('Max 5 files per message.');
+                break;
+            }
+            const item = {
+                id: 'f_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
+                name: file.name,
+                size: file.size,
+                type: file.type || 'application/octet-stream',
+            };
+            if (file.type.startsWith('image/')) {
+                try {
+                    item.preview = await readFileAsDataURL(file);
+                } catch (_) {}
+            } else if (
+                /text|json|javascript|csv|markdown|xml|html|css|python|plain/i.test(file.type) ||
+                /\.(txt|md|csv|json|js|ts|py|html|css|log)$/i.test(file.name)
+            ) {
+                try {
+                    const t = await readFileAsText(file);
+                    item.text = t.slice(0, 40000);
+                } catch (_) {}
+            }
+            pendingFiles.push(item);
+        }
+        renderAttachBar();
+    }
+
+    function buildMessageWithFiles(text, files) {
+        let body = text || '';
+        if (files && files.length) {
+            const parts = files.map((f) => {
+                if (f.text) {
+                    return '\n\n[File: ' + f.name + ']\n```\n' + f.text.slice(0, 12000) + '\n```';
+                }
+                if (f.type.startsWith('image/')) {
+                    return '\n\n[Image attached: ' + f.name + ']';
+                }
+                return '\n\n[File attached: ' + f.name + ' (' + formatBytes(f.size) + ')]';
+            });
+            body = (body + parts.join('')).trim();
+        }
+        return body;
+    }
+
+    function speak(text) {
+        if (!settings.voiceOut) return;
+        if (!window.speechSynthesis) return;
+        try {
+            window.speechSynthesis.cancel();
+            const u = new SpeechSynthesisUtterance(String(text).replace(/[*`#]/g, ' ').slice(0, 600));
+            u.rate = settings.voiceStyle === 'soft' ? 0.92 : 1;
+            u.pitch = settings.voiceStyle === 'soft' ? 1.05 : 1;
+            window.speechSynthesis.speak(u);
+        } catch (_) {}
+    }
+
     async function send(text) {
-        text = (text || input.value || '').trim();
-        if (!text) return;
+        text = (text !== undefined ? text : input.value || '').trim();
+        const files = pendingFiles.slice();
+        if (!text && !files.length) return;
+
+        const contentForApi = buildMessageWithFiles(text, files);
+        const displayText = text || (files.length ? 'Shared ' + files.length + ' file' + (files.length > 1 ? 's' : '') : '');
+
         input.value = '';
+        pendingFiles = [];
+        renderAttachBar();
         autoSize();
         sendBtn.disabled = true;
+        stopRecording();
 
-        chat.messages.push({ role: 'user', content: text, at: Date.now() });
-        appendMsg('user', text);
+        const fileMeta = files.map((f) => ({
+            name: f.name,
+            size: f.size,
+            type: f.type,
+            preview: f.preview,
+        }));
+
+        chat.messages.push({
+            role: 'user',
+            content: contentForApi,
+            display: displayText,
+            files: fileMeta,
+            at: Date.now(),
+        });
+        appendMsg('user', displayText, false, fileMeta);
         persist();
 
         const typingEl = appendMsg('bot', '', true);
@@ -138,7 +333,7 @@
         try {
             const history = settings.rememberContext
                 ? chat.messages.map((m) => ({ role: m.role, content: m.content }))
-                : [{ role: 'user', content: text }];
+                : [{ role: 'user', content: contentForApi }];
             const { text: reply, source } = await Sakavi.generateReply(history, settings);
             typingEl.remove();
             chat.messages.push({ role: 'assistant', content: reply, at: Date.now(), source });
@@ -146,6 +341,7 @@
             persist();
             statusLine.textContent = source === 'demo' ? 'Demo mode' : 'Ready';
             document.getElementById('demoBadge').style.display = source === 'demo' ? 'inline' : 'none';
+            speak(reply);
         } catch (e) {
             typingEl.remove();
             const err = 'Sorry — ' + (e.message || 'something went wrong') + '. Check Settings / API config.';
@@ -154,15 +350,108 @@
             persist();
             statusLine.textContent = 'Error';
         }
-        sendBtn.disabled = !input.value.trim();
+        sendBtn.disabled = !canSend();
         input.focus();
     }
 
     function autoSize() {
         input.style.height = 'auto';
         input.style.height = Math.min(input.scrollHeight, 140) + 'px';
-        sendBtn.disabled = !input.value.trim();
+        sendBtn.disabled = !canSend();
     }
+
+    function stopRecording() {
+        if (recognition && isRecording) {
+            try { recognition.stop(); } catch (_) {}
+        }
+        isRecording = false;
+        micBtn.classList.remove('recording');
+        micBtn.title = 'Voice input';
+    }
+
+    function startRecording() {
+        const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+        if (!SR) {
+            alert('Voice input is not supported in this browser. Try Chrome or Edge.');
+            return;
+        }
+        recognition = new SR();
+        recognition.lang = settings.language === 'Hindi' ? 'hi-IN' : 'en-IN';
+        recognition.interimResults = true;
+        recognition.continuous = false;
+
+        recognition.onstart = () => {
+            isRecording = true;
+            micBtn.classList.add('recording');
+            micBtn.title = 'Listening… tap to stop';
+            statusLine.textContent = 'Listening…';
+        };
+        recognition.onresult = (ev) => {
+            let final = '';
+            let interim = '';
+            for (let i = ev.resultIndex; i < ev.results.length; i++) {
+                const t = ev.results[i][0].transcript;
+                if (ev.results[i].isFinal) final += t;
+                else interim += t;
+            }
+            if (final) {
+                input.value = (input.value ? input.value + ' ' : '') + final.trim();
+                autoSize();
+            } else if (interim) {
+                // show interim in status only
+                statusLine.textContent = interim.slice(0, 40) + (interim.length > 40 ? '…' : '');
+            }
+        };
+        recognition.onerror = () => {
+            stopRecording();
+            statusLine.textContent = 'Mic error';
+        };
+        recognition.onend = () => {
+            stopRecording();
+            if (statusLine.textContent === 'Listening…' || statusLine.textContent.startsWith(statusLine.textContent)) {
+                statusLine.textContent = document.getElementById('demoBadge').style.display !== 'none' ? 'Demo mode' : 'Ready';
+            }
+            input.focus();
+        };
+        try {
+            recognition.start();
+        } catch (_) {
+            alert('Could not start microphone. Check browser permissions.');
+        }
+    }
+
+    attachBtn.addEventListener('click', () => fileInput.click());
+    fileInput.addEventListener('change', () => {
+        addFiles(fileInput.files);
+        fileInput.value = '';
+    });
+
+    micBtn.addEventListener('click', () => {
+        if (settings.voiceIn === false) {
+            if (confirm('Voice input is off in Settings. Turn it on?')) {
+                settings.voiceIn = true;
+                Sakavi.saveSettings(settings);
+            } else return;
+        }
+        if (isRecording) stopRecording();
+        else startRecording();
+    });
+
+    // Drag & drop onto composer
+    const composerWrap = document.querySelector('.composer-wrap');
+    ['dragenter', 'dragover'].forEach((ev) => {
+        composerWrap.addEventListener(ev, (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+        });
+    });
+    composerWrap.addEventListener('drop', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length) {
+            addFiles(e.dataTransfer.files);
+        }
+    });
 
     input.addEventListener('input', autoSize);
     input.addEventListener('keydown', (e) => {

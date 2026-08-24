@@ -64,10 +64,9 @@ Works with OpenAI, Groq, Together, Azure OpenAI (compatible path), etc.
 ## Deploy frontend separately
 
 - **Vercel / Netlify / Cloudflare Pages**: upload the `sakavi/` folder as static site.
-- **Clean URLs**: links use paths without `.html` (e.g. `/settings`, `/history`).  
-  - Netlify: `_redirects` is included.  
-  - Vercel: `vercel.json` rewrites are included.  
-  - nginx: add try_files or rewrite rules for extensionless paths.
+- **Clean URLs**: app links use paths without `.html` (e.g. `settings`, `history`).  
+  - On static hosts, configure your own rewrites if extensionless routes 404.  
+  - Files on disk remain `settings.html`, `history.html`, etc.
 - **nginx**: point root to `sakavi/`.
 - No Node build step required.
 
