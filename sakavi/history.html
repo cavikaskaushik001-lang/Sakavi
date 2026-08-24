@@ -11,7 +11,7 @@
 <body>
     <div class="app">
         <header class="header">
-            <a class="icon-btn" href="index.html" aria-label="Back">
+            <a class="icon-btn" href="./" aria-label="Back">
                 <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="15 18 9 12 15 6"/></svg>
             </a>
             <div class="header-title"><h1>History</h1><p>Saved on this device</p></div>
@@ -33,7 +33,7 @@
             const chats = Sakavi.loadChats();
             const list = document.getElementById('list');
             if (!chats.length) {
-                list.innerHTML = '<div class="empty">No chats yet.<br><a href="index.html" style="color:#a78bfa">Start one</a></div>';
+                list.innerHTML = '<div class="empty">No chats yet.<br><a href="./" style="color:#a78bfa">Start one</a></div>';
                 return;
             }
             list.innerHTML = '<div class="card" style="padding:0;"></div>';
@@ -42,7 +42,7 @@
                 const row = document.createElement('div');
                 row.className = 'chat-item';
                 row.innerHTML = `<div class="meta"><h4>${(c.title || 'Chat').replace(/</g,'&lt;')}</h4><p>${when(c.updatedAt)} · ${(c.messages||[]).length} messages</p></div><button type="button" class="del">Delete</button>`;
-                row.querySelector('.meta').addEventListener('click', () => location.href = 'index.html?c=' + c.id);
+                row.querySelector('.meta').addEventListener('click', () => location.href = './?c=' + c.id);
                 row.querySelector('.del').addEventListener('click', (e) => {
                     e.stopPropagation();
                     if (confirm('Delete this chat?')) { Sakavi.deleteChat(c.id); render(); }

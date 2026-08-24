@@ -4,29 +4,46 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>About · Sakavi</title>
-<meta name="theme-color" content="#000">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<meta name="theme-color" content="#07070b">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/settings.css">
 </head>
 <body>
 <div class="app">
   <div class="top-bar">
-    <a class="back" href="settings.html" aria-label="Back">
+    <a class="back" href="settings" aria-label="Back">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="15 18 9 12 15 6"/></svg>
     </a>
     <div class="top-title">About</div>
   </div>
   
 <div class="content">
+  <div class="intro">Sakavi is a standalone AI assistant focused on privacy, speed, and a clean premium experience.</div>
+
   <div class="group">
-    <div class="item" style="cursor:default;"><div class="body"><div class="label">Sakavi</div><div class="sub" id="ver">v1.0.0</div></div></div>
-    <div class="item" style="cursor:default;"><div class="body"><div class="label">Build</div><div class="sub">Standalone AI assistant</div></div></div>
+    <div class="item" style="cursor:default;"><div class="body"><div class="label">App</div><div class="sub">Sakavi</div></div></div>
+    <div class="item" style="cursor:default;"><div class="body"><div class="label">Version</div><div class="sub" id="ver">v1.0.0</div></div></div>
+    <div class="item" style="cursor:default;"><div class="body"><div class="label">Build type</div><div class="sub">Standalone PWA · static frontend</div></div></div>
+    <div class="item" style="cursor:default;"><div class="body"><div class="label">Data location</div><div class="sub">Chat history in browser localStorage</div></div></div>
   </div>
+
+  <div class="feature-list" style="margin-top:12px;">
+    <div class="fi">
+      <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+      <div><div class="t">Privacy first</div><div class="d">Conversations stay on this device until you connect your own API / edge function.</div></div>
+    </div>
+    <div class="fi">
+      <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg></div>
+      <div><div class="t">Deploy anywhere</div><div class="d">Works on Vercel, Netlify, Cloudflare Pages, nginx, or any static host.</div></div>
+    </div>
+  </div>
+
   <div class="group" style="margin-top:12px;">
     <a class="item" href="#"><div class="body"><div class="label">Terms of use</div></div><div class="trail"><span class="chev">›</span></div></a>
     <a class="item" href="#"><div class="body"><div class="label">Privacy policy</div></div><div class="trail"><span class="chev">›</span></div></a>
+    <a class="item" href="#"><div class="body"><div class="label">Open source licenses</div></div><div class="trail"><span class="chev">›</span></div></a>
   </div>
-  <div class="note">© Sakavi. Deploy frontend anywhere; API via Supabase edge function.</div>
+  <div class="note">© Sakavi. Frontend can be deployed independently; model calls go through your Supabase edge function or OpenAI-compatible API.</div>
 </div>
 
 </div>
@@ -43,9 +60,7 @@ function setPref(key, val) {
     localStorage.setItem('sakavi_settings_v1', JSON.stringify(s));
   } catch(_) {}
 }
-
 document.getElementById('ver').textContent = 'v' + ((window.SAKAVI_CONFIG||{}).version||'1.0.0');
-
 </script>
 </body>
 </html>

@@ -1,0 +1,29 @@
+{
+  "rewrites": [
+    { "source": "/history", "destination": "/history.html" },
+    { "source": "/settings", "destination": "/settings.html" },
+    { "source": "/settings-about", "destination": "/settings-about.html" },
+    { "source": "/settings-accent", "destination": "/settings-accent.html" },
+    { "source": "/settings-ads", "destination": "/settings-ads.html" },
+    { "source": "/settings-appearance", "destination": "/settings-appearance.html" },
+    { "source": "/settings-data", "destination": "/settings-data.html" },
+    { "source": "/settings-email", "destination": "/settings-email.html" },
+    { "source": "/settings-general", "destination": "/settings-general.html" },
+    { "source": "/settings-memory", "destination": "/settings-memory.html" },
+    { "source": "/settings-notifications", "destination": "/settings-notifications.html" },
+    { "source": "/settings-parental", "destination": "/settings-parental.html" },
+    { "source": "/settings-personalization", "destination": "/settings-personalization.html" },
+    { "source": "/settings-phone", "destination": "/settings-phone.html" },
+    { "source": "/settings-plugins", "destination": "/settings-plugins.html" },
+    { "source": "/settings-remote", "destination": "/settings-remote.html" },
+    { "source": "/settings-report", "destination": "/settings-report.html" },
+    { "source": "/settings-safety", "destination": "/settings-safety.html" },
+    { "source": "/settings-security", "destination": "/settings-security.html" },
+    { "source": "/settings-storage", "destination": "/settings-storage.html" },
+    { "source": "/settings-subscription", "destination": "/settings-subscription.html" },
+    { "source": "/settings-trusted-contact", "destination": "/settings-trusted-contact.html" },
+    { "source": "/settings-upgrade", "destination": "/settings-upgrade.html" },
+    { "source": "/settings-voice", "destination": "/settings-voice.html" },
+    { "source": "/settings-workspace", "destination": "/settings-workspace.html" }
+  ]
+}

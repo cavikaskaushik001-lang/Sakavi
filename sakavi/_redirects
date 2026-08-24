@@ -1,0 +1,27 @@
+# Clean URLs without .html (Netlify)
+/history           /history.html          200
+/settings          /settings.html         200
+/settings-about    /settings-about.html   200
+/settings-accent   /settings-accent.html  200
+/settings-ads      /settings-ads.html     200
+/settings-appearance /settings-appearance.html 200
+/settings-data     /settings-data.html    200
+/settings-email    /settings-email.html   200
+/settings-general  /settings-general.html 200
+/settings-memory   /settings-memory.html  200
+/settings-notifications /settings-notifications.html 200
+/settings-parental /settings-parental.html 200
+/settings-personalization /settings-personalization.html 200
+/settings-phone    /settings-phone.html   200
+/settings-plugins  /settings-plugins.html 200
+/settings-remote   /settings-remote.html  200
+/settings-report   /settings-report.html  200
+/settings-safety   /settings-safety.html  200
+/settings-security /settings-security.html 200
+/settings-storage  /settings-storage.html 200
+/settings-subscription /settings-subscription.html 200
+/settings-trusted-contact /settings-trusted-contact.html 200
+/settings-upgrade  /settings-upgrade.html 200
+/settings-voice    /settings-voice.html   200
+/settings-workspace /settings-workspace.html 200
+/*                 /index.html            200

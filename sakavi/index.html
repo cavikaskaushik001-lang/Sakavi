@@ -16,7 +16,7 @@
 <body>
     <div class="app">
         <header class="header">
-            <a class="icon-btn" href="history.html" title="History" aria-label="Chat history">
+            <a class="icon-btn" href="history" title="History" aria-label="Chat history">
                 <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h10M4 18h14"/></svg>
             </a>
             <div class="avatar-logo">S</div>
@@ -27,7 +27,7 @@
             <button class="icon-btn" id="newChatBtn" title="New chat" aria-label="New chat">
                 <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
             </button>
-            <a class="icon-btn" href="settings.html" title="Settings" aria-label="Settings">
+            <a class="icon-btn" href="settings" title="Settings" aria-label="Settings">
                 <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
             </a>
         </header>
@@ -173,7 +173,7 @@
     });
     sendBtn.addEventListener('click', () => send());
     document.getElementById('newChatBtn').addEventListener('click', () => {
-        location.href = 'index.html';
+        location.href = './';
     });
     document.querySelectorAll('.chip').forEach((c) => {
         c.addEventListener('click', () => send(c.dataset.q));

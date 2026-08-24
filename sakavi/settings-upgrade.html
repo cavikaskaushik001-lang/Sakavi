@@ -4,28 +4,79 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Upgrade plan · Sakavi</title>
-<meta name="theme-color" content="#000">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<meta name="theme-color" content="#07070b">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/settings.css">
 </head>
 <body>
 <div class="app">
   <div class="top-bar">
-    <a class="back" href="settings.html" aria-label="Back">
+    <a class="back" href="settings" aria-label="Back">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="15 18 9 12 15 6"/></svg>
     </a>
     <div class="top-title">Upgrade plan</div>
   </div>
   
 <div class="content">
-  <div class="intro">Unlock higher limits, priority access, and advanced models.</div>
-  <div class="group">
-    <div class="item" style="cursor:default;"><div class="body"><div class="label">Sakavi Free</div><div class="sub">Current plan · standard limits</div></div></div>
-    <div class="item" style="cursor:default;"><div class="body"><div class="label">Sakavi Plus</div><div class="sub">₹299/mo · higher limits, priority</div></div></div>
-    <div class="item" style="cursor:default;"><div class="body"><div class="label">Sakavi Pro</div><div class="sub">₹999/mo · max context & models</div></div></div>
+  <div class="intro">Choose a plan that matches how you use Sakavi. Higher tiers unlock longer context, priority responses, and advanced models.</div>
+
+  <div class="pricing">
+    <div class="price-card current">
+      <div class="plan-name">Sakavi Free</div>
+      <div class="plan-price">₹0 <span>/ month</span></div>
+      <ul>
+        <li>Standard message limits</li>
+        <li>On-device chat history</li>
+        <li>Basic models & demo mode</li>
+        <li>Essential settings & personalization</li>
+      </ul>
+    </div>
+
+    <div class="price-card featured">
+      <span class="badge">Popular</span>
+      <div class="plan-name">Sakavi Plus</div>
+      <div class="plan-price">₹299 <span>/ month</span></div>
+      <ul>
+        <li>5× higher daily limits</li>
+        <li>Priority queue during peak hours</li>
+        <li>Access to stronger models</li>
+        <li>Longer conversation memory</li>
+        <li>Custom persona & voice options</li>
+        <li>Early access to new features</li>
+      </ul>
+    </div>
+
+    <div class="price-card">
+      <div class="plan-name">Sakavi Pro</div>
+      <div class="plan-price">₹999 <span>/ month</span></div>
+      <ul>
+        <li>Maximum context & throughput</li>
+        <li>All premium models unlocked</li>
+        <li>Workspace & team tools (soon)</li>
+        <li>Priority support</li>
+        <li>Advanced plugins & remote control</li>
+        <li>Usage analytics & export</li>
+      </ul>
+    </div>
   </div>
-  <button type="button" class="btn primary" onclick="alert('Connect payment provider in production.')">Upgrade plan</button>
-  <div class="note">Billing is not connected in this build. UI is ready for Razorpay / Stripe.</div>
+
+  <div class="feature-list" style="margin-top:8px;">
+    <div class="fi">
+      <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg></div>
+      <div><div class="t">Faster responses</div><div class="d">Priority routing means less waiting when demand is high.</div></div>
+    </div>
+    <div class="fi">
+      <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+      <div><div class="t">Private by design</div><div class="d">History stays on your device. Live calls go only to your configured API.</div></div>
+    </div>
+    <div class="fi">
+      <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg></div>
+      <div><div class="t">Your style, your rules</div><div class="d">Personalization, memory, and safety controls work the same on every plan.</div></div>
+    </div>
+  </div>
+
+  <button type="button" class="btn primary" id="upgradeBtn">Upgrade to Plus</button>
+  <div class="note">Billing is not connected in this build. UI is ready for Razorpay / Stripe. You can cancel anytime from Subscription.</div>
 </div>
 
 </div>
@@ -42,7 +93,9 @@ function setPref(key, val) {
     localStorage.setItem('sakavi_settings_v1', JSON.stringify(s));
   } catch(_) {}
 }
-
+document.getElementById('upgradeBtn').addEventListener('click', () => {
+  alert('Connect payment provider (Razorpay / Stripe) in production to complete upgrade.');
+});
 </script>
 </body>
 </html>

@@ -1,15 +1,17 @@
-/* Sakavi settings — ChatGPT-style list UI */
+/* Sakavi settings — premium ChatGPT-style list UI */
 :root {
-    --bg: #000;
-    --row: #1c1c1e;
-    --row-hover: #2c2c2e;
-    --text: #fff;
-    --muted: #8e8e93;
-    --accent: #0a84ff;
-    --accent-purple: #a78bfa;
-    --danger: #ff453a;
+    --bg: #07070b;
+    --row: #16161f;
+    --row-hover: #1e1e2a;
+    --text: #f4f4f8;
+    --muted: #8b8b9e;
+    --accent: #a78bfa;
+    --accent-2: #818cf8;
+    --accent-grad: linear-gradient(135deg, #a78bfa 0%, #818cf8 50%, #60a5fa 100%);
+    --danger: #f43f5e;
     --sep: #000;
     --radius: 14px;
+    --success: #30d158;
 }
 
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -181,3 +183,102 @@ html, body {
 .mem-item .txt { flex: 1; font-size: 14px; line-height: 1.4; }
 .mem-item .del { border: none; background: none; color: var(--danger); font-size: 13px; font-weight: 600; cursor: pointer; font-family: inherit; }
 .empty { padding: 40px 24px; text-align: center; color: var(--muted); font-size: 14px; }
+
+/* Premium pricing cards */
+.pricing {
+    display: flex; flex-direction: column; gap: 12px;
+    padding: 0 14px 8px;
+}
+.price-card {
+    background: var(--row);
+    border-radius: 16px;
+    padding: 18px 18px 16px;
+    border: 1px solid rgba(255,255,255,0.06);
+    position: relative;
+    transition: border-color 0.2s, transform 0.15s;
+}
+.price-card:active { transform: scale(0.99); }
+.price-card.featured {
+    border-color: rgba(167,139,250,0.45);
+    background: linear-gradient(160deg, rgba(167,139,250,0.12) 0%, var(--row) 55%);
+    box-shadow: 0 0 0 1px rgba(167,139,250,0.15), 0 8px 24px rgba(0,0,0,0.35);
+}
+.price-card .badge {
+    position: absolute; top: 12px; right: 12px;
+    font-size: 11px; font-weight: 700; letter-spacing: 0.03em;
+    padding: 4px 8px; border-radius: 999px;
+    background: var(--accent-grad); color: #fff;
+}
+.price-card .plan-name {
+    font-size: 17px; font-weight: 700; margin: 0 0 4px;
+}
+.price-card .plan-price {
+    font-size: 22px; font-weight: 800; letter-spacing: -0.02em;
+    background: var(--accent-grad); -webkit-background-clip: text; background-clip: text;
+    -webkit-text-fill-color: transparent; margin: 0 0 10px;
+}
+.price-card .plan-price span {
+    font-size: 13px; font-weight: 500; -webkit-text-fill-color: var(--muted);
+}
+.price-card ul {
+    list-style: none; margin: 0; padding: 0;
+}
+.price-card ul li {
+    font-size: 13px; color: var(--muted); padding: 4px 0;
+    display: flex; align-items: flex-start; gap: 8px;
+}
+.price-card ul li::before {
+    content: '✓'; color: var(--accent); font-weight: 700; flex-shrink: 0;
+}
+.price-card.current .plan-name::after {
+    content: ' · Current'; font-weight: 500; color: var(--muted); font-size: 13px;
+}
+
+/* Feature list & premium details */
+.feature-list {
+    margin: 0 14px 16px;
+    background: var(--row);
+    border-radius: var(--radius);
+    overflow: hidden;
+}
+.feature-list .fi {
+    display: flex; gap: 12px; padding: 14px 16px;
+    border-bottom: 0.5px solid rgba(255,255,255,0.06);
+}
+.feature-list .fi:last-child { border-bottom: none; }
+.feature-list .fi .ico {
+    width: 36px; height: 36px; border-radius: 10px;
+    background: rgba(167,139,250,0.15); color: var(--accent);
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.feature-list .fi .ico svg { width: 18px; height: 18px; }
+.feature-list .fi .t { font-size: 15px; font-weight: 600; }
+.feature-list .fi .d { font-size: 13px; color: var(--muted); margin-top: 2px; line-height: 1.4; }
+
+/* Profile hero polish */
+.profile-hero .avatar {
+    background: var(--accent-grad);
+    color: #fff;
+    box-shadow: 0 4px 20px rgba(167,139,250,0.35);
+}
+.btn.primary {
+    background: var(--accent-grad);
+    box-shadow: 0 4px 16px rgba(167,139,250,0.3);
+}
+.btn.primary:active { opacity: 0.9; }
+
+.chip.on {
+    border-color: var(--accent);
+    background: rgba(167,139,250,0.15);
+    color: #c4b5fd;
+}
+.radio.on { border-color: var(--accent); }
+.radio.on::after { background: var(--accent); }
+.item.accent .label { color: var(--accent); }
+
+/* Subtle section polish */
+.section-title {
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    font-size: 12px;
+}

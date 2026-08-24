@@ -4,27 +4,41 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Subscription · Sakavi</title>
-<meta name="theme-color" content="#000">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<meta name="theme-color" content="#07070b">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/settings.css">
 </head>
 <body>
 <div class="app">
   <div class="top-bar">
-    <a class="back" href="settings.html" aria-label="Back">
+    <a class="back" href="settings" aria-label="Back">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="15 18 9 12 15 6"/></svg>
     </a>
     <div class="top-title">Subscription</div>
   </div>
   
 <div class="content">
-  <div class="intro">Manage your Sakavi subscription.</div>
+  <div class="intro">Manage your current plan, billing details, and renewal. Changes take effect on the next billing cycle.</div>
   <div class="group">
-    <div class="item" style="cursor:default;"><div class="body"><div class="label">Plan</div><div class="sub">Free</div></div></div>
-    <div class="item" style="cursor:default;"><div class="body"><div class="label">Renewal</div><div class="sub">—</div></div></div>
-    <div class="item" style="cursor:default;"><div class="body"><div class="label">Payment method</div><div class="sub">None</div></div></div>
+    <div class="item" style="cursor:default;"><div class="body"><div class="label">Current plan</div><div class="sub">Sakavi Free</div></div></div>
+    <div class="item" style="cursor:default;"><div class="body"><div class="label">Status</div><div class="sub">Active · no billing</div></div></div>
+    <div class="item" style="cursor:default;"><div class="body"><div class="label">Renewal date</div><div class="sub">—</div></div></div>
+    <div class="item" style="cursor:default;"><div class="body"><div class="label">Payment method</div><div class="sub">None connected</div></div></div>
   </div>
-  <a class="btn secondary" href="settings-upgrade.html" style="text-decoration:none;">View plans</a>
+
+  <div class="feature-list" style="margin-top:12px;">
+    <div class="fi">
+      <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 10h18"/></svg></div>
+      <div><div class="t">What you get on Free</div><div class="d">Standard limits, on-device history, demo & basic models, full personalization and safety controls.</div></div>
+    </div>
+    <div class="fi">
+      <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3l2.5 6.5L21 12l-6.5 2.5L12 21l-2.5-6.5L3 12l6.5-2.5L12 3z"/></svg></div>
+      <div><div class="t">Ready to go further?</div><div class="d">Plus and Pro unlock higher limits, priority, and advanced models. Cancel anytime.</div></div>
+    </div>
+  </div>
+
+  <a class="btn primary" href="settings-upgrade" style="text-decoration:none;">View plans & upgrade</a>
+  <div class="note">No charge will be made until you connect a payment method and choose a paid plan.</div>
 </div>
 
 </div>
@@ -41,7 +55,6 @@ function setPref(key, val) {
     localStorage.setItem('sakavi_settings_v1', JSON.stringify(s));
   } catch(_) {}
 }
-
 </script>
 </body>
 </html>
